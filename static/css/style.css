@@ -1,0 +1,274 @@
+:root {
+    --max-width-content: 1100px;
+    --header-height: 140px;
+    --open-panel-width: 300px;
+    --main-color: #a59898;
+    --main-color-rgb: 165, 152, 152;
+    --btn-hover-color: #0093ff;
+    --btn-hover-color-rgb: 0, 147, 255;
+    --warn-color: #c30;
+    --warn-color-rgb: 204, 51, 0;
+    --logo-bg-color: #3d405b;
+    --logo-bg-color-rgb: 61, 64, 91;
+    --logo-main-color: #f4f1de;
+    --logo-main-color-rgb: 244, 241, 222;
+}
+@font-face {
+    font-family: 'Museo Sans Cyrl 300';
+    src: url('/fonts/MuseoSansCyrl-300.woff2') format('woff2'),
+    url('/fonts/MuseoSansCyrl-300.woff') format('woff');
+    font-weight: normal;
+    font-style: normal;
+}
+@font-face {
+    font-family: 'Museo Sans Cyrl 500';
+    src: url('/fonts/MuseoSansCyrl-500.woff2') format('woff2'),
+    url('/fonts/MuseoSansCyrl-500.woff') format('woff');
+    font-weight: bold;
+    font-style: normal;
+}
+*::-webkit-scrollbar {
+    width: 7px;
+    background-color: #f9f9fd;
+}
+*::-webkit-scrollbar-thumb {
+    background-color: #656565;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body { font-family: 'Museo Sans Cyrl 300'; }
+
+/*
+* Делаем три контейнера внутри _wrapper такими,
+* чтобы нижний последний прижимался к самому низу.
+* Аля, sticky footer
+*/
+html, body { height: 100%; }
+._wrapper {
+    min-height: 100%;
+    display: grid;
+    grid-template-rows: auto 1fr auto;
+}
+/* Ready */
+
+header {
+    z-index: 2;
+    position: sticky;
+    top: -1px;
+    height: var(--header-height);
+    color: black;
+    background: var(--main-color);
+    /* background: var(--logo-bg-color); */
+
+    transition: all .2s ease;
+}
+footer {
+    border-top: 1px solid #00000025;
+}
+
+.content {
+    margin: 0 auto;
+    max-width: var(--max-width-content);
+    padding: 0 20px;
+}
+
+header>.content {
+    display: flex;
+    justify-content: space-between;
+    padding: 10px;
+}
+
+.top-bar {
+    width: 100%;
+    display: grid;
+    grid-template:
+        "menu logo auth"
+        /40px 1fr  40px;
+
+    grid-gap: 10px;
+    align-items: center;
+    padding: 0 20px;
+
+    &> * {
+        display: flex;
+        align-items: center;
+    }
+
+    &> .nav-menu {
+        grid-area: menu;
+    }
+
+    &> .nav-logo {
+        grid-area: logo;
+        justify-self: center;
+        font-size: 32px;
+
+        &> a {
+            align-items: center;
+            gap: 10px;
+
+            &> .logo,
+            &> .logo-large
+            {
+                width: 100%;
+                height: calc(var(--header-height) - 20px);
+
+            }
+            
+            &.cabinet-link {
+                height: calc(var(--header-height) - 20px);
+            }
+
+            &> .logo {
+                transition: all .2s ease;
+            }
+        }
+
+        &> a.cabinet-link {
+
+            &> div {
+                position: relative;
+                padding-right: 24px;
+
+                &> svg {
+                    position: absolute;
+                    top: -5px; right: 0;
+                }
+            }
+        }
+    }
+
+    &> .nav-auth {
+        grid-area: auth;
+        justify-self: end;
+    }
+
+    & a {
+        text-decoration: none;
+        color: inherit;
+        display: inline-flex;
+    }
+}
+
+.clickable {
+    cursor: pointer;
+    color: var(--logo-main-color);
+    fill: var(--logo-main-color);
+
+    &:hover {
+        color: gray;
+        fill: gray;
+    }
+}
+
+/* Когда header прилипает к потолку из-за прокручивания */
+header.is-pinned .logo {
+    /* background: none; */
+    transform: rotate(-90deg);
+}
+
+header:not(.is-pinned) .logo {
+    transform: rotate(0deg);
+}
+
+.is-pinned {
+    color: white;
+    background: black;
+}
+
+/* DEFAULT */
+.default-btn:not([disabled]) {
+    user-select: none;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0 5px;
+    gap: 5px;
+    border: solid black 1px;
+    border-radius: 2px;
+    color: black;
+    box-shadow: none;
+    min-height: 26px;
+
+    transition: all .2s ease;
+}
+.default-btn:not([disabled]):hover {
+    border-color: #0093ff;
+    border-radius: 5px;
+    color: #0093ff;
+    box-shadow: 0 2px 5px black;
+}
+.default-btn:not([disabled]):active {
+    box-shadow: 0 0 3px #0093ff;
+}
+
+/* SVG */
+
+
+.green-svg {
+    color: #0d0;
+}
+.red-svg {
+    color: #c30;
+}
+.green-balcony-svg {
+    fill: #0d0;
+}
+.red-balcony-svg {
+    fill: #c30;
+}
+
+/* BUTTONS */
+.red-text {
+    position: relative;
+    color: darkred;
+}
+.blue-text {
+    position: relative;
+    color: darkblue;
+}
+.dots-button {
+    height: 12px;
+    width: 12px;
+    font-size: 24px;
+    position: absolute;
+    bottom: 18px;
+    left: 4px;
+}
+
+@media (width < 600px) {
+    .large-icon {
+        width: 256px;
+    }
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

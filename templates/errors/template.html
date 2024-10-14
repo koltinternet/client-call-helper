@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>{{ title }}</title>
+    <link rel="stylesheet" href="/css/style.css">
+    <link rel="stylesheet" href="/css/error.css">
+</head>
+<body>
+    
+    <div class="_wrapper">
+        <div class="content">
+            <div class="error-data">
+
+                <div class="error-title"><h1>{{ title }}</h1></div>
+                <div class="error-code"><h2>{{ code }}</h2></div>
+                <br>
+                <div class="error-body">{{ body | safe }}</div>
+
+            </div>
+        </div>
+    </div>
+
+</body>
+<script>
+</script>
+</html>

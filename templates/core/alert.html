@@ -1,0 +1,175 @@
+
+<style>
+    .alert-wrapper {
+        z-index: 999999;
+        position: fixed;
+        top: calc(var(--header-height) + 10px);
+        right: 10px;
+        width: calc(var(--open-panel-width) + 10%);
+        height: auto;
+        visibility: hidden;
+        perspective: 2000px;
+
+    }
+    .alert-container * {
+        padding: revert;
+    }
+    .alert-container {
+        background: white;
+        box-shadow: 0 0 10px black;
+        border-radius: 5px;
+        padding: 10px;
+
+        transform: rotateX(-90deg);
+        transition: transform .2s ease;
+    }
+
+    .alert-toggle-show {
+        transform: rotateX(0deg);
+    }
+
+    .alert-info {
+        box-shadow: 0 0 10px blue;
+    }
+
+    .alert-error {
+        box-shadow: 0 0 10px red;
+    }
+
+    .alert-success {
+        box-shadow: 0 0 10px green;
+    }
+
+    .alert-warning {
+        box-shadow: 0 0 10px orange;
+    }
+
+    .alert-pos {
+        position: absolute;
+        top: 10px; right: 10px;
+    }
+    .alert-close {
+        user-select: none;
+        cursor: pointer;
+        font-size: 20px;
+        color: black;
+        width: 24px;
+        height: 24px;
+        text-align: center;
+        line-height: 24px;
+        border-radius: 5px;
+        box-shadow: 0 0 1px black;
+        opacity: .4;
+    }
+
+    .alert-close:hover {
+        box-shadow: 0 0 5px black;
+        opacity: 1;
+    }
+
+    .alert-close:active {
+        box-shadow: 0 0 3px black;
+    }
+
+    .alert-title {
+        padding-bottom: 10px;
+    }
+</style>
+
+
+<div class="alert-wrapper">
+    <div class="alert-container">
+        <div class="alert-close alert-pos">✕</div>
+        <div class="alert-title"><h3>Title</h3></div>
+        <div class="alert-content">
+            Content
+        </div>
+    </div>
+</div>
+
+
+<script>
+
+    class Alert {
+        static wrapper = document.querySelector(".alert-wrapper");
+        static container = document.querySelector(".alert-container");
+        static title = document.querySelector(".alert-title>h3");
+        static content = document.querySelector(".alert-content");
+        static #lastStyle = "";
+        static #state = false;
+        static #timerId = null;
+
+        /**
+        * Отображает алерт
+        * @param {string} title - заголовок
+        * @param {string} content - содержание
+        * @param {string} style - none | info | error | warning | success
+        * @param {number} seconds - время отображения. 0 - бесконечное время
+        * @return {void}
+        */
+        static #show(title, content, style="none", seconds=0) {
+            if (this.#state) {
+                this.container.classList.toggle(this.#lastStyle);
+            } else {
+                Object.assign(this.wrapper.style, {visibility: "visible"});
+            }
+
+            this.#lastStyle = "alert-" + style;
+            this.title.innerHTML = title;
+            this.content.innerHTML = content;
+            this.container.classList.toggle(this.#lastStyle);
+            if (!this.#state) {
+                this.container.classList.toggle("alert-toggle-show");
+                this.#state = true;
+            }
+            
+            if (seconds > 1) {
+                clearTimeout(this.#timerId);
+                this.#timerId = setTimeout(() => this.close(), seconds * 1000);
+            }
+        }
+
+        static info(content, title="Важно", seconds=0) {
+            this.#show(title, content, "info", seconds);
+        }
+
+        static error(content, title="Ошибка", seconds=0) {
+            this.#show(title, content, "error", seconds);
+        }
+
+        static success(content, title="Успешно", seconds=0) {
+            this.#show(title, content, "success", seconds);
+        }
+
+        static warning(content, title="Внимание!", seconds=0) {
+            this.#show(title, content, "warning", seconds);
+        }
+
+        static default(content, title="Инфо", seconds=0) {
+            this.#show(title, content, "none", seconds);
+        }
+
+        /**
+        * Закрывает алерт
+        * @return {void}
+        */
+        static close() {
+            if (this.#state) {
+                this.container.classList.toggle("alert-toggle-show");
+                this.#state = false;
+            } 
+        }
+
+        static wrap() {
+            if (!this.#state) {
+                Object.assign(this.wrapper.style, {visibility: "hidden"});
+                this.container.classList.toggle(this.#lastStyle);
+            }
+        }
+    }
+
+    document.querySelector(".alert-close").addEventListener("click", () => Alert.close());
+
+    Alert.container.addEventListener("transitionend", () => Alert.wrap());
+
+</script>

@@ -1,0 +1,177 @@
+
+<header>
+    <div class="content">
+        <nav class="top-bar">
+            <div class="nav-menu">
+                <a href="#" aria-label="Меню" title="Меню" class="clickable">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-stack-3" width="50" height="50" viewBox="0 0 24 24" stroke-width="1.2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                        <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+                        <path d="M12 2l-8 4l8 4l8 -4l-8 -4" />
+                        <path d="M4 10l8 4l8 -4" />
+                        <path d="M4 18l8 4l8 -4" />
+                        <path d="M4 14l8 4l8 -4" />
+                    </svg>
+                </a>
+            </div>
+        </nav>
+    </div>
+</header>
+
+<style>
+    .nav-overlay {
+        z-index: 3;
+        cursor: pointer;
+        position: fixed;
+        top: calc(var(--header-height) - 1px);
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, .5);
+        
+        visibility: hidden;
+        opacity: 0;
+        transition: all .5s ease;
+    }
+
+    .nav-overlay-is-open {
+        visibility: visible;
+        opacity: 1;
+    }
+
+    .nav-menu-container {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        left: calc(var(--open-panel-width) * -1 - 10%);
+    }
+    .nav-auth-container,
+    .nav-menu-container {
+        z-index: 3;
+        position: fixed;
+        top: calc(var(--header-height) - 1px);
+        width: calc(var(--open-panel-width) + 10%);
+        height: 100%;
+        /* border: solid 1px black; */
+        background: none;
+        box-shadow: none;
+
+        transition: all .5s ease;
+    }
+
+    .nav-auth-is-open,
+    .nav-menu-is-open {background: white;}
+    
+    .nav-menu-is-open {
+        box-shadow: 2px 5px 10px black;
+        left: 0;
+    }
+
+    .nav-menu-container {
+        &>ul {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+
+            &>li {
+                list-style: none;
+
+                &>a {
+                    text-decoration: none;
+                    color: black;
+                    display: block;
+
+                    &:hover {color: gray;}
+
+                    &>span {
+                        text-transform: uppercase;
+                    }
+                }
+            }
+        } 
+    }
+
+    .nav-auth-container {
+        right: calc(var(--open-panel-width) * -1 - 10%);
+    }
+
+    .nav-auth-is-open {
+        box-shadow: -2px 5px 10px black;
+        right: 0;
+    }
+</style>
+
+<div class="nav-overlay"></div>
+
+<div class="nav-menu-container">
+    {# <ul>
+        <li><a href="/about"><span>О нас</span></a></li>
+        <li><a href="/flats"><span>Наши квартиры</span></a></li>
+        <li><a href="/excursions"><span>Экскурсии</span></a></li>
+        <li><a href="/contacts"><span>Контакты</span></a></li>
+        <li><a href="/cleaning"><span>Клининг</span></a></li>
+    </ul> #}
+</div>
+
+<script>
+    const menu_container = document.querySelector(".nav-menu-container");
+    const menu_btn = document.querySelector(".nav-menu");
+    const auth_container = document.querySelector(".nav-auth-container");
+    const auth_btn_in = document.querySelector(".nav-auth-in");
+    const auth_btn_out = document.querySelector(".nav-auth-out");
+    const overlay = document.querySelector(".nav-overlay");
+
+    const eStop = (e) => {
+        e.stopPropagation();
+        e.preventDefault();
+    };
+
+    overlay.addEventListener("click", (e) => {
+        eStop(e);
+        menu_container.classList.remove("nav-menu-is-open");
+        (auth_container && auth_container.classList.remove("nav-auth-is-open"));
+        overlay.classList.remove("nav-overlay-is-open");
+    });
+
+    menu_btn.addEventListener("click", (e) => {
+        eStop(e);
+        if (menu_container.classList.contains("nav-menu-is-open")) {
+            menu_container.classList.remove("nav-menu-is-open");
+            overlay.classList.remove("nav-overlay-is-open");
+            return;
+        }
+
+        menu_container.classList.toggle("nav-menu-is-open");
+        (auth_container && auth_container.classList.remove("nav-auth-is-open"));
+        overlay.classList.add("nav-overlay-is-open");
+    });
+
+    if (auth_btn_in) {
+            auth_btn_in.addEventListener("click", (e) => {
+            eStop(e);
+            if (auth_container.classList.contains("nav-auth-is-open")) {
+                auth_container.classList.remove("nav-auth-is-open");
+                overlay.classList.remove("nav-overlay-is-open");
+                return;
+            }
+            menu_container.classList.remove("nav-menu-is-open");
+            auth_container.classList.toggle("nav-auth-is-open");
+            overlay.classList.add("nav-overlay-is-open");
+        });
+    }
+
+    if (auth_btn_out) {
+        auth_btn_out.addEventListener("click", (e) => {
+            eStop(e);
+            fetch("/cabinet/common/logout", {method: "GET"}).then(resp => resp.text()).then(data => {
+                try {
+                    const result = JSON.parse(data);
+                    window.location.href = "/";
+                } catch (e) {
+                    Alert.error("Что-то пошло не так. Попробуйте еще раз.");
+                    console.log(data);
+                }
+            });
+        })
+    }
+
+</script>

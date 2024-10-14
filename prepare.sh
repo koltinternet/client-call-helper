@@ -1,0 +1,13 @@
+#!/usr/bin/env bash
+
+echo Создание виртуального окружения ...
+py -m venv venv
+
+echo Активация виртуального окружения ...
+source ./venv/bin/activate
+
+echo Upgrade pip ...
+py -m pip install --upgrade pip
+
+echo Установка зависимостей ...
+pip install -r requirements.txt

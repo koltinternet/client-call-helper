@@ -1,0 +1,46 @@
+
+<style>
+    footer {
+        background: #a59898;
+
+        &> .content {
+
+            &> .foot-field {
+                padding: 20px 0;                
+            }
+        }
+
+        &> .underline {
+            padding: 10px 0;
+            background: black;
+            color: white;
+
+            & a { color: inherit; }
+
+            &> .content {
+
+                &> .info-bar {
+                    display: flex;
+                    justify-content: space-between;
+                    align-items: center;
+                }
+            }
+        }
+    }
+    
+</style>
+
+<footer>
+    <div class="content">
+        <div class="foot-field">
+            <h3>Подвальчик</h3>
+        </div>
+    </div>
+    <div class="underline">
+        <div class="content">
+            <div class="info-bar">
+                <span>© Copyright - {{ site_label }} {{ date_now.year }}</span>
+            </div>
+        </div>
+    </div>
+</footer>

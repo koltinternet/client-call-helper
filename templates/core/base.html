@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>{{ title }}</title>
+    <link rel="stylesheet" href="/css/style.css">
+    <link rel="icon" type="image/png" sizes="32x32" href="/img/logo/favicon-32x32.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="/img/logo/apple-touch-icon.png">
+    <link rel="icon" type="image/png" sizes="192x192" href="/img/logo/android-chrome-192x192.png">
+    <link rel="icon" type="image/png" sizes="512x512" href="/img/logo/android-chrome-512x512.png">
+
+    <link rel="manifest" href="/webmanifest.json">
+
+    <script src="/js/main.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+</head>
+<body>
+
+    <script>
+        const tg_bot_name = "{{ tg_bot_name }}";
+        let {{ csrf_field_name }} = "{{ token }}";
+    </script>
+    
+    <div class="_wrapper">
+
+        {# ============= ALERT ============== #}
+
+        {% include "core/alert.html" %}
+
+        {# ============= HEAD ============== #}
+
+        {% include "core/head.html" %}
+        
+        {# ============= MAIN ============== #}
+
+        <main>
+            {% block content %}{% endblock content %}
+        </main>
+
+        {# ============= FOOT ============== #}
+
+        {% include "core/foot.html" %}
+
+    </div>
+
+
+</body>
+<script>
+    (() => {
+        "use strict";
+
+        const header = document.querySelector("header")
+        const observer = new IntersectionObserver(
+            ([e]) => {
+                e.target.classList.toggle("is-pinned", e.intersectionRatio < 1)
+            },
+            { threshold: [1] }
+        );
+
+        observer.observe(header);
+    })();
+</script>
+</html>
