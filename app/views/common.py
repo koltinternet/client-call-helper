@@ -1,9 +1,9 @@
 
 import aiohttp_jinja2
-from aiohttp.web import Request, RouteTableDef
+from aiohttp.web import Request, Response, RouteTableDef, WebSocketResponse
 # from aiohttp_session import get_session
 from app.func import default_context
-from app.const import log
+from app.const import log, SOCKETS
 
 routes = RouteTableDef()
 
@@ -24,3 +24,38 @@ async def index(request: Request) -> dict:
     )
 
     return ctx
+
+
+@routes.post("/action")
+async def action(request: Request) -> Response:
+    """ Принимает json с описанием события и
+    транслирует их в сокеты.
+    """
+
+    body: dict = await request.json()
+    log.info(body)
+
+    for ws in SOCKETS:
+        await ws.send_json(body)
+
+    return Response(text="ok", status=200)
+
+
+@routes.get("/ws")
+async def ws_loop(request: Request) -> WebSocketResponse:
+    """ Создаёт и поддерживает потоковые соединения.
+    """
+
+    ws = WebSocketResponse()
+    await ws.prepare(request)
+    log.debug(f"<red>{ws}-connected</>")
+
+    SOCKETS.append(ws)
+
+    async for msg in ws:
+        log.debug(f"<red>{ws}-message</>: {msg}")
+
+    SOCKETS.remove(ws)
+    log.debug(f"<red>{ws}-disconnected</>")
+
+    return ws

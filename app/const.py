@@ -1,4 +1,5 @@
 from aiopath import AsyncPath
+from aiohttp.web import WebSocketResponse
 from hashlib import md5
 from loguru import logger
 import copy
@@ -21,6 +22,8 @@ SECRET_PHRASE = md5("случайная строка для шифрования
 
 SITE_LABEL = "Client Call Helper"
 
+# ===========================================
+SOCKETS: list[WebSocketResponse] = []
 # ===========================================
 USE_POSTGRES = False                     # ! Использовать PostgreSQL
 # ===========================================
