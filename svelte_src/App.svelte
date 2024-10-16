@@ -1,11 +1,20 @@
 <script>
     import { ActionMessage } from "./lib/types";
     import { onMount } from "svelte";
+    
+    /** @type {WebSocket} */
+    let socket = null;
 
-    const chat_url = "ws:" + window.location.host + "/ws";
-
+    const ws_url = "ws:" + window.location.host + "/ws";
+    
     /** @type ActionMessage[] */
-    let actions = [];
+    let actions = [{
+        id: 1,
+        phone: "89217809021",
+        action: "new",
+        status: "user",
+        data: {}
+    }];
 
     let msg_id = 0;
     
@@ -22,49 +31,53 @@
 
         // Добавляем новое сообщение в список
         if (message.action === "new") {
-            Object.assign(message, { id : ++msg_id, data: {} })
+            // Object.assign(message, { id : ++msg_id, data: {} });
             actions = [message, ...actions];
+            return;
+        }
 
         // Удаляем сообщение с завершённым событием из списка
-        } else if (message.action === "done") {
+        if (message.action === "done") {
             actions = actions.filter((action) => action.phone !== message.phone);
+            return;
+        }
         
-        // Обновляем данные событие
-        } else if (message.action === "update") {
+        // Обновляем данные события, данными из Гидры
+        if (message.action === "update") {
             const index = actions.findIndex((action) => action.phone === message.phone);
             Object.assign(actions[index], { data: message.data });
-            actions = [...actions];
+
         } else {
-            
             // Получаем индекс события, у которого аналогичный номер телефона
             const index = actions.findIndex((action) => action.phone === message.phone);
             // Обновляем событие
             Object.assign(actions[index], { action: message.action });
-            actions = [...actions];
         }
+
+        actions = [...actions];
         
     }
 
-    /**
-     * Отправляет сообщение в ws.
-     * @return {void}
-    */
-    function sendMsg() {
-        if (!input_text) {
-            return;
-        }
-        performMsg(input_text, username, false);
+    // /**
+    //  * Отправляет сообщение в ws.
+    //  * @return {void}
+    // */
+    // function sendMsg() {
+    //     if (!input_text) {
+    //         return;
+    //     }
+    //     performMsg(input_text, username, false);
 
-        socket.send(JSON.stringify({
-            type: "message",
-            data: {
-                msg: input_text
-            }
-        }));
+    //     socket.send(JSON.stringify({
+    //         type: "message",
+    //         data: {
+    //             msg: input_text
+    //         }
+    //     }));
 
-        input_text = "";
-        audio_out.play();
-    }
+    //     input_text = "";
+    //     audio_out.play();
+    // }
 
     /**
      * Обработчик подключения к ws.
@@ -114,7 +127,7 @@
     */
     function makeChat() {
         if (!socket || socket.readyState == WebSocket.CLOSED) {
-            socket = new WebSocket(chat_url);
+            socket = new WebSocket(ws_url);
 
             socket.onopen = handlerWSOpen;
             socket.onmessage = handlerWSMessage;
@@ -130,11 +143,63 @@
 </script>
 
 
-<main>
-    
-</main>
+<div class="app-container">
+    <h1>Активные события</h1>
+
+    <hr>
+
+    <div class="action-field">
+
+        {#each actions as action (action.id)}
+            <div class="action-item">
+                <div class="action-type">{action.action}</div>
+                <div class="action-body">
+                    <div class="phone">{action.phone}</div>
+                    <div class="status">{action.status}</div>
+                </div>
+            </div>
+        {:else}
+            <span class="empty">Пока нет активных событий</span>
+        {/each}
+
+    </div>
+</div>
 
 
 <style>
-    
+    .app-container {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+
+        &> .action-field {
+            min-height: 50px;
+            
+            &> .action-item {
+                display: flex;
+                gap: 10px;
+                border: solid gray 1px;
+                border-radius: 5px;
+                padding: 10px;
+
+                &> .action-type {
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    width: 150px;
+                }
+
+                &> .action-body {
+                    display: flex;
+                    flex-flow: row wrap;
+                    gap: 5px;
+                    width: 100%;
+
+                    &> * {
+                        padding: 5px;
+                    }
+                }
+            }
+        }
+    }
 </style>

@@ -14,16 +14,16 @@
     --logo-main-color-rgb: 244, 241, 222;
 }
 @font-face {
-    font-family: 'Museo Sans Cyrl 300';
-    src: url('/fonts/MuseoSansCyrl-300.woff2') format('woff2'),
-    url('/fonts/MuseoSansCyrl-300.woff') format('woff');
+    font-family: "Museo Sans Cyrl 300";
+    src: url("/fonts/MuseoSansCyrl-300.woff2") format("woff2"),
+        url("/fonts/MuseoSansCyrl-300.woff") format("woff");
     font-weight: normal;
     font-style: normal;
 }
 @font-face {
-    font-family: 'Museo Sans Cyrl 500';
-    src: url('/fonts/MuseoSansCyrl-500.woff2') format('woff2'),
-    url('/fonts/MuseoSansCyrl-500.woff') format('woff');
+    font-family: "Museo Sans Cyrl 500";
+    src: url("/fonts/MuseoSansCyrl-500.woff2") format("woff2"),
+        url("/fonts/MuseoSansCyrl-500.woff") format("woff");
     font-weight: bold;
     font-style: normal;
 }
@@ -34,18 +34,28 @@
 *::-webkit-scrollbar-thumb {
     background-color: #656565;
 }
-* { box-sizing: border-box; margin: 0; padding: 0; }
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
 
-body { font-family: 'Museo Sans Cyrl 300'; }
+body {
+    font-family: "Museo Sans Cyrl 300";
+}
 
 /*
 * Делаем три контейнера внутри _wrapper такими,
 * чтобы нижний последний прижимался к самому низу.
 * Аля, sticky footer
 */
-html, body { height: 100%; }
+html,
+body {
+    height: 100%;
+}
 ._wrapper {
     min-height: 100%;
+    width: 100%;
     display: grid;
     grid-template-rows: auto 1fr auto;
 }
@@ -60,7 +70,7 @@ header {
     background: var(--main-color);
     /* background: var(--logo-bg-color); */
 
-    transition: all .2s ease;
+    transition: all 0.2s ease;
 }
 footer {
     border-top: 1px solid #00000025;
@@ -72,7 +82,7 @@ footer {
     padding: 0 20px;
 }
 
-header>.content {
+header > .content {
     display: flex;
     justify-content: space-between;
     padding: 10px;
@@ -83,12 +93,11 @@ header>.content {
     display: grid;
     grid-template:
         "menu logo auth"
-        /40px 1fr  40px;
+        /40px 1fr 40px;
 
     grid-gap: 10px;
     align-items: center;
     padding: 0 20px;
-
 }
 
 /* Когда header прилипает к потолку из-за прокручивания */
@@ -121,7 +130,7 @@ header:not(.is-pinned) .logo {
     box-shadow: none;
     min-height: 26px;
 
-    transition: all .2s ease;
+    transition: all 0.2s ease;
 }
 .default-btn:not([disabled]):hover {
     border-color: #0093ff;
@@ -152,5 +161,3 @@ header:not(.is-pinned) .logo {
     bottom: 18px;
     left: 4px;
 }
-
-

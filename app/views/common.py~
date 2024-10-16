@@ -35,13 +35,11 @@ async def action(request: Request) -> Response:
     транслирует их в сокеты.
     """
 
-    action: dict = await request.json(
-        # loads=action_decoder.decode
-    )
-    log.info(f"Входящее событие: {action}")
+    body: dict = await request.json()
+    log.info(f"Входящее событие: {body}")
 
     for ws in SOCKETS:
-        await ws.send_json(action)
+        await ws.send_json(body)
 
     return Response(text="ok", status=200)
 
