@@ -1,4 +1,4 @@
-
+from aiojobs.aiohttp import spawn
 import aiohttp_jinja2
 from aiohttp.web import Request, Response, RouteTableDef, WebSocketResponse
 # from aiohttp_session import get_session
@@ -29,6 +29,18 @@ async def index(request: Request) -> dict:
     return ctx
 
 
+async def call_hydra(action: dict) -> None:
+    """ Выполняет запросы к Гидре.
+    """
+    # TODO: Запрос к Гидре
+    # TODO: Обновить событие данными ответа
+    # TODO: Отправить событие в сокеты
+
+    # action["action"] = "update"
+    # for ws in SOCKETS:
+    #     await ws.send_json(action)
+
+
 @routes.post("/action")
 async def action(request: Request) -> Response:
     """ Принимает json с описанием события и
@@ -42,6 +54,9 @@ async def action(request: Request) -> Response:
 
     for ws in SOCKETS:
         await ws.send_json(action)
+
+    if action.get("action") == "new":
+        await spawn(request=request, coro=call_hydra(action))
 
     return Response(text="ok", status=200)
 
