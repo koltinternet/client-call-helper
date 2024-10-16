@@ -1,6 +1,6 @@
 :root {
     --max-width-content: 1100px;
-    --header-height: 140px;
+    --header-height: 60px;
     --open-panel-width: 300px;
     --main-color: #a59898;
     --main-color-rgb: 165, 152, 152;
@@ -89,76 +89,6 @@ header>.content {
     align-items: center;
     padding: 0 20px;
 
-    &> * {
-        display: flex;
-        align-items: center;
-    }
-
-    &> .nav-menu {
-        grid-area: menu;
-    }
-
-    &> .nav-logo {
-        grid-area: logo;
-        justify-self: center;
-        font-size: 32px;
-
-        &> a {
-            align-items: center;
-            gap: 10px;
-
-            &> .logo,
-            &> .logo-large
-            {
-                width: 100%;
-                height: calc(var(--header-height) - 20px);
-
-            }
-            
-            &.cabinet-link {
-                height: calc(var(--header-height) - 20px);
-            }
-
-            &> .logo {
-                transition: all .2s ease;
-            }
-        }
-
-        &> a.cabinet-link {
-
-            &> div {
-                position: relative;
-                padding-right: 24px;
-
-                &> svg {
-                    position: absolute;
-                    top: -5px; right: 0;
-                }
-            }
-        }
-    }
-
-    &> .nav-auth {
-        grid-area: auth;
-        justify-self: end;
-    }
-
-    & a {
-        text-decoration: none;
-        color: inherit;
-        display: inline-flex;
-    }
-}
-
-.clickable {
-    cursor: pointer;
-    color: var(--logo-main-color);
-    fill: var(--logo-main-color);
-
-    &:hover {
-        color: gray;
-        fill: gray;
-    }
 }
 
 /* Когда header прилипает к потолку из-за прокручивания */
@@ -205,20 +135,6 @@ header:not(.is-pinned) .logo {
 
 /* SVG */
 
-
-.green-svg {
-    color: #0d0;
-}
-.red-svg {
-    color: #c30;
-}
-.green-balcony-svg {
-    fill: #0d0;
-}
-.red-balcony-svg {
-    fill: #c30;
-}
-
 /* BUTTONS */
 .red-text {
     position: relative;
@@ -236,39 +152,5 @@ header:not(.is-pinned) .logo {
     bottom: 18px;
     left: 4px;
 }
-
-@media (width < 600px) {
-    .large-icon {
-        width: 256px;
-    }
-}
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
