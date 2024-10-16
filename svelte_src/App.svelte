@@ -1,5 +1,5 @@
 <script>
-    import { ActionMessage } from "./lib/types";
+    import { ActionMessage } from "./func/types";
     import { onMount } from "svelte";
     
     /** @type {WebSocket} */
