@@ -31,7 +31,7 @@
 
         // Добавляем новое сообщение в список
         if (message.action === "new") {
-            // Object.assign(message, { id : ++msg_id, data: {} });
+            Object.assign(message, { id : ++msg_id, data: {} });
             actions = [message, ...actions];
             return;
         }
@@ -41,16 +41,14 @@
             actions = actions.filter((action) => action.phone !== message.phone);
             return;
         }
-        
+
+        const index = actions.findIndex((action) => action.phone === message.phone);
         // Обновляем данные события, данными из Гидры
         if (message.action === "update") {
-            const index = actions.findIndex((action) => action.phone === message.phone);
             Object.assign(actions[index], { data: message.data });
-
+        
+        // Обновляем тип события
         } else {
-            // Получаем индекс события, у которого аналогичный номер телефона
-            const index = actions.findIndex((action) => action.phone === message.phone);
-            // Обновляем событие
             Object.assign(actions[index], { action: message.action });
         }
 
@@ -99,7 +97,7 @@
     function handlerWSMessage({data}) {
         const msg = JSON.parse(data);
         performMsg(msg);
-        console.log("Chat message: ", msg);
+        console.log("WS message: ", msg);
         // audio_in.play();
     }
 
@@ -109,7 +107,7 @@
      * @return {void}
     */
     function handlerWSClose(event) {
-        console.log("Chat close: ", event);
+        console.log("WS close: ", event);
     }
 
     /**
@@ -118,14 +116,14 @@
      * @return {void}
     */
     function handlerWSError(error) {
-        console.log("Chat error: ", error);
+        console.log("WS error: ", error);
     }
 
     /**
      * Создаёт подключение к ws.
      * @return {void}
     */
-    function makeChat() {
+    function makeWS() {
         if (!socket || socket.readyState == WebSocket.CLOSED) {
             socket = new WebSocket(ws_url);
 
@@ -137,7 +135,7 @@
     }
 
     onMount(() => {
-        makeChat();
+        makeWS();
     });
 
 </script>
