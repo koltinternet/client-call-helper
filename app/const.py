@@ -1,7 +1,7 @@
 from aiopath import AsyncPath
 from aiohttp.web import WebSocketResponse
-from hashlib import md5
 from loguru import logger
+from datetime import timedelta
 import copy
 
 log = logger.opt(colors=True)
@@ -16,16 +16,18 @@ SRC_DIR = ROOT_DIR / "src"
 
 DB_PATH = SRC_DIR / "Baza.db"
 
-TOKEN_FILE = SRC_DIR / "token_file"
-
 # ===========================================
 
-SECRET_PHRASE = md5("случайная строка для шифрования".encode("utf-8")).hexdigest()
+RE_AUTH_HYDRA_DELAY = timedelta(hours=1)
+""" Промежутки времени, по истечении которых необходимо
+переподключиться к Hydra.
+"""
 
 SITE_LABEL = "Client Call Helper"
 
 # ===========================================
 SOCKETS: list[WebSocketResponse] = []
+""" Список клиентских WS-соединений. """
 # ===========================================
 USE_POSTGRES = False                     # ! Использовать PostgreSQL
 # ===========================================
