@@ -58,10 +58,11 @@ def get_addresses_by_phone(auth_token: str, phone: str) -> dict:
     search_data = hydra_request(auth_token, 'search', {'result_subtype_id': '2001', 'query': phone})
     if not search_data or not search_data.get('search_results'):
         return search_data
-
     user_id = search_data['search_results'][0]['n_result_id']
+
     customer_data = hydra_request(auth_token, 'subjects/customers/batch', {'ids': [user_id]}, 'post')
     user_base_id = customer_data['customers'][0]['n_base_subject_id']
+    user_name = customer_data['customers'][0]['vc_base_subject_name']
 
     addresses = []
     address_data = hydra_request(auth_token, 'subject_addresses', {'subject_id': [user_base_id]})
@@ -70,6 +71,7 @@ def get_addresses_by_phone(auth_token: str, phone: str) -> dict:
 
     return {
         'user_id': user_id,
+        'user_name:': user_name,
         'user_url': f'{USER_EDIT_URL}{user_id}',
         'addresses': addresses
     }
