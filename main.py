@@ -1,4 +1,4 @@
-from aiohttp import web
+from aiohttp import web, ClientResponseError
 from aiojobs.aiohttp import setup as setup_aiojobs
 import jinja2
 import aiohttp_jinja2
@@ -10,9 +10,10 @@ from tortoise.contrib.aiohttp import register_tortoise
 
 from app.db_func import prepare_db
 from app.const import (
-    # log,
+    log,
     TORTOISE_CONFIG,
 )
+from app.types import HYDRA
 
 from app.func import (
     simple_json_encoder, simple_json_decoder,
@@ -26,6 +27,11 @@ async def on_startup(_: web.Application) -> None:
     """
     await prepare_db()
     await create_default_paths()
+    try:
+        await HYDRA.init()
+    except ClientResponseError:
+        log.error("Ошибка при инициализации Гидры")
+        raise
 
 
 async def on_shutdown(_: web.Application) -> None:

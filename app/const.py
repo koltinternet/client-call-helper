@@ -16,6 +16,8 @@ SRC_DIR = ROOT_DIR / "src"
 
 DB_PATH = SRC_DIR / "Baza.db"
 
+TOKEN_FILE = SRC_DIR / "token_file"
+
 # ===========================================
 
 SECRET_PHRASE = md5("случайная строка для шифрования".encode("utf-8")).hexdigest()

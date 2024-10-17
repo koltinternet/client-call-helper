@@ -1,15 +1,15 @@
 {
-    "name": "PhoneViewer",
-    "short_name": "PV",
+    "name": "Client Call Helper",
+    "short_name": "CCH",
     "description": "Просмотр активных телефонных сессий.",
     "icons": [
         {
-            "src": "/img/logo/android-chrome-192x192.png",
+            "src": "/img/logo/kt_logo-HAMMER-192.png",
             "sizes": "192x192",
             "type": "image/png"
         },
         {
-            "src": "//img/logo/android-chrome-512x512.png",
+            "src": "//img/logo/kt_logo-HAMMER-512.png",
             "sizes": "512x512",
             "type": "image/png"
         }

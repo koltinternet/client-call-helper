@@ -9,10 +9,24 @@ from msgspec import json
 
 from app.const import (
     SITE_LABEL,
+    TOKEN_FILE,
 
     SRC_DIR,
     LOGS_DIR,
 )
+
+
+async def load_token() -> str:
+    try:
+        async with TOKEN_FILE.open("r", encoding="utf-8") as file:
+            return await file.read()
+    except FileNotFoundError:
+        return ""
+
+
+async def save_token(token: str) -> None:
+    async with AsyncPath(TOKEN_FILE).open("w", encoding="utf-8") as file:
+        await file.write(token)
 
 
 async def create_default_paths() -> None:
