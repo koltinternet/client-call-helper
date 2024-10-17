@@ -28,7 +28,7 @@ async def on_startup(_: web.Application) -> None:
     await prepare_db()
     await create_default_paths()
     try:
-        await HYDRA.init()
+        await HYDRA.make_auth()
     except ClientResponseError:
         log.error("Ошибка при инициализации Гидры")
         raise
@@ -37,7 +37,7 @@ async def on_startup(_: web.Application) -> None:
 async def on_shutdown(_: web.Application) -> None:
     """ Выполняется при выключении приложения.
     """
-    pass
+    await HYDRA.done()
 
 
 def setup_routes(application: web.Application) -> None:
