@@ -1,12 +1,13 @@
 from msgspec import Struct
 from aiohttp import ClientSession, ClientResponseError, request, ClientTimeout
 from app_config import HYDRA_USER, HYDRA_PASSWORD
-from app.func import save_token, load_token
-from app.const import log
+from app.const import log, RE_AUTH_HYDRA_DELAY
 from msgspec import json, field
+from datetime import datetime
 
 
 TIMEOUT = ClientTimeout(60)
+API_URL = "https://h.kolt-internet.ru/rest/v2/"
 
 class ActionMessage(Struct):
     id: int
@@ -101,17 +102,19 @@ class HydraAddresses(Struct):
 
 
 class Hydra:
-    api_url = "https://h.kolt-internet.ru/rest/v2/"
-
     session: ClientSession | None = None
+    """ Сессия Гидры. """
+    auth_time: datetime | None = None
+    """ Время авторизации. """
 
     def __init__(self) -> None:
         self.executors: dict = {}
 
-    async def init(self) -> None:
-        if not (token := await load_token()):
-            token = await self.get_auth_token()
-            await save_token(token)
+    async def make_auth(self) -> None:
+        """ Выполняет авторизацию в Гидре,
+        запоминая время.
+        """
+        token = await self.get_auth_token()
 
         self.session = ClientSession(
             headers={
@@ -127,10 +130,12 @@ class Hydra:
         }
 
     async def done(self) -> None:
-        await self.session.close()
+        if not self.session.closed:
+            await self.session.close()
 
-    async def get_auth_token(self) -> str:
-        auth_url = self.api_url + "login"
+    @classmethod
+    async def get_auth_token(cls) -> str:
+        auth_url = API_URL + "login"
         options = dict(
             json=dict(
             session=dict(
@@ -144,20 +149,26 @@ class Hydra:
             async with request("POST", auth_url, **options) as response:
                 response.raise_for_status()
                 session = (await response.json())["session"]
+                cls.auth_time = datetime.now()
                 return session["token"]
         except ClientResponseError as e:
-            log.error(f"Ошибка при авторизации при получении токена у Гидры: {e}")
+            log.error(f"Ошибка авторизации при получении токена у Гидры: {e}")
             raise
 
     async def hydra_request(
             self, url_path: str,
             params: dict,
             method: str = "GET") -> bytes:
+        """ Выполняет запрос к Гидре, проверяя время
+        авторизации и авторизует, если время сессии истекло."""
+
+        if not self.auth_time or datetime.now() - self.auth_time > RE_AUTH_HYDRA_DELAY:
+            await self.make_auth()
 
         if not (executor := self.executors.get(method)):
             raise ValueError(f"Метод {method} не поддерживается")
 
-        url_path = self.api_url + url_path
+        url_path = API_URL + url_path
         options: dict = {"params": params} if method == "GET" else {"json": params}
         options["timeout"] = TIMEOUT
 
