@@ -1,0 +1,5 @@
+HydraSearch(result=[HydraSearchEntry(user_second_id=70012991, login='zipvir010101', phone='79217809021 ')])
+
+HydraCustomers(result=[HydraCustomerEntry(user_first_id=70011991, full_name='Петров Александр Георгиевич', short_name='Петров А. Г.', login='zipvir010101', created_date='2017-12-26T13:55:42+03:00', n_firm_id=100)])
+
+HydraAddresses(result=[HydraAddressEntry(addr_type_id=13006, data='79217809021', title='Для уведомлений'), HydraAddressEntry(addr_type_id=1006, data='Всеволожский р-н, д. Вирки, д. 1', title='Фактический адрес')])

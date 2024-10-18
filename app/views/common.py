@@ -1,14 +1,24 @@
+from datetime import datetime
+
 from aiojobs.aiohttp import spawn
 import aiohttp_jinja2
 from aiohttp.web import Request, Response, RouteTableDef, WebSocketResponse
 # from aiohttp_session import get_session
 from app.func import default_context
-from app.const import log, SOCKETS
-from app.types import ActionMessage
+from app.const import log, SOCKETS, PROFILE_URL
+from app.types import (
+    PhoneMessage,
+    HYDRA,
+    ACTIVE_SESSIONS,
+    CallSession,
+    HydraData,
+)
 from msgspec.json import Decoder
+from pprint import pprint
+
 
 routes = RouteTableDef()
-action_decoder = Decoder(ActionMessage)
+action_decoder = Decoder(PhoneMessage)
 
 __all__ = (
     "routes",
@@ -29,16 +39,36 @@ async def index(request: Request) -> dict:
     return ctx
 
 
-async def call_hydra(action: dict) -> None:
+async def call_hydra(session: CallSession) -> None:
     """ Выполняет запросы к Гидре.
     """
-    # TODO: Запрос к Гидре
-    # TODO: Обновить событие данными ответа
-    # TODO: Отправить событие в сокеты
+    # ? Помечаем событие как обновлённое из Гидры
+    data = dict()
 
-    # action["action"] = "update"
-    # for ws in SOCKETS:
-    #     await ws.send_json(action)
+    search_result = await HYDRA.search(session.phone[-10:])
+    if search_entry := search_result.get_entry():
+        customer_result = await HYDRA.get_customer(
+            search_entry.user_second_id)
+
+        customer = customer_result.get_entry()
+        address_result = await HYDRA.get_addresses(
+            customer.user_first_id)
+
+        data.update(
+            login=search_entry.login,
+            phone=search_entry.phone,
+            profile_url=PROFILE_URL + str(search_entry.user_second_id),
+            full_name=customer.full_name,
+            short_name=customer.short_name,
+            created_date=customer.created_date,
+            firm_id=customer.firm_id,
+            addresses=address_result.get_hydra_addresses()
+        )
+
+    session.action = "hydra"
+    session.data = HydraData(**data)
+
+    await ACTIVE_SESSIONS.render()
 
 
 @routes.post("/action")
@@ -47,16 +77,36 @@ async def action(request: Request) -> Response:
     транслирует их в сокеты.
     """
 
-    action: dict = await request.json(
-        # loads=action_decoder.decode
+    action: PhoneMessage = await request.json(
+        loads=action_decoder.decode
     )
-    log.info(f"Входящее событие: {action}")
+    # log.info(f"Входящее событие: {action}")
+    pprint(action)
+    print("=" * 10)
 
-    for ws in SOCKETS:
-        await ws.send_json(action)
+    # for ws in SOCKETS:
+    #     await ws.send_json(action)
+    #
 
-    if action.get("action") == "new":
-        await spawn(request=request, coro=call_hydra(action))
+    if action.context == "ivr-welcome":
+        # ? Получаем номер телефона начиная с девятки,
+        # ? на случай конфликта между восьмёркой и семёркой
+
+        call_session = CallSession(
+            phone=action.caller_id_num,
+            action="new",
+            status="",
+            time=datetime.fromtimestamp(float(action.event_time)),
+            event_id=action.linked_id,
+            support_id=""
+        )
+
+        await ACTIVE_SESSIONS.add_session(call_session)
+
+        await spawn(
+            request=request,
+            coro=call_hydra(call_session)
+        )
 
     return Response(text="ok", status=200)
 

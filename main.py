@@ -20,6 +20,7 @@ from app.func import (
     create_default_paths,)
 
 from ehandlers import setup_error_handlers
+from app_config import APP_PORT
 
 
 async def on_startup(_: web.Application) -> None:
@@ -102,4 +103,4 @@ def create_app(testing: bool = False) -> web.Application:
 
 if __name__ == "__main__":
     app = create_app()
-    web.run_app(app, host="127.0.0.1", port=8000)
+    web.run_app(app, host="0.0.0.0", port=APP_PORT)

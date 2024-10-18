@@ -1,0 +1,317 @@
+
+-> Входящий звонок - IVR
+{'BRIDGEPEER': '',
+ 'CALLERID(ANI)': '',
+ 'CALLERID(DNID)': '',
+ 'CALLERID(RDNIS)': '',
+ 'CALLERID(name)': '+79217732247',
+ 'CALLERID(num)': '+79217732247',
+ 'CHANNEL(accountcode)': '',
+ 'CHANNEL(amaflags)': '3',
+ 'CHANNEL(appdata)': '',
+ 'CHANNEL(appname)': '',
+ 'CHANNEL(channame)': 'SIP/550-00000032',
+ 'CHANNEL(context)': 'from-gsm-gw',
+ 'CHANNEL(exten)': '700',
+ 'CHANNEL(linkedid)': '1729243964.366',
+ 'CHANNEL(uniqueid)': '1729243964.366',
+ 'CHANNEL(userfield)': '',
+ 'eventextra': '',
+ 'eventtime': '1729243964.531014',
+ 'eventtype': 'CHAN_START',
+ 'userdeftype': ''}
+==========
+{'BRIDGEPEER': '',
+ 'CALLERID(ANI)': '+79217732247',
+ 'CALLERID(DNID)': '700',
+ 'CALLERID(RDNIS)': '',
+ 'CALLERID(name)': '+79217732247',
+ 'CALLERID(num)': '+79217732247',
+ 'CHANNEL(accountcode)': '',
+ 'CHANNEL(amaflags)': '3',
+ 'CHANNEL(appdata)': '',
+ 'CHANNEL(appname)': 'Answer',
+ 'CHANNEL(channame)': 'SIP/550-00000032',
+ 'CHANNEL(context)': 'ivr-welcome',
+ 'CHANNEL(exten)': 's',
+ 'CHANNEL(linkedid)': '1729243964.366',
+ 'CHANNEL(uniqueid)': '1729243964.366',
+ 'CHANNEL(userfield)': '',
+ 'eventextra': '',
+ 'eventtime': '1729243964.531530',
+ 'eventtype': 'ANSWER',
+ 'userdeftype': ''}
+==========
+
+
+
+
+
+
+-> Соединение (после ivr; проброс на трубку)
+{'BRIDGEPEER': '',
+ 'CALLERID(ANI)': '',
+ 'CALLERID(DNID)': '',
+ 'CALLERID(RDNIS)': '',
+ 'CALLERID(name)': 'support-1',
+ 'CALLERID(num)': '501',
+ 'CHANNEL(accountcode)': '',
+ 'CHANNEL(amaflags)': '3',
+ 'CHANNEL(appdata)': '',
+ 'CHANNEL(appname)': '',
+ 'CHANNEL(channame)': 'SIP/501-00000033',
+ 'CHANNEL(context)': 'from-internal',
+ 'CHANNEL(exten)': 's',
+ 'CHANNEL(linkedid)': '1729243964.366',
+ 'CHANNEL(uniqueid)': '1729244005.369',
+ 'CHANNEL(userfield)': '',
+ 'eventextra': '',
+ 'eventtime': '1729244005.508472',
+ 'eventtype': 'CHAN_START',
+ 'userdeftype': ''}
+==========
+
+
+
+
+
+-> Взяли трубку
+{'BRIDGEPEER': '',
+ 'CALLERID(ANI)': '501',
+ 'CALLERID(DNID)': '',
+ 'CALLERID(RDNIS)': '',
+ 'CALLERID(name)': 'support-1',
+ 'CALLERID(num)': '501',
+ 'CHANNEL(accountcode)': '',
+ 'CHANNEL(amaflags)': '3',
+ 'CHANNEL(appdata)': '(Outgoing Line)',
+ 'CHANNEL(appname)': 'AppQueue',
+ 'CHANNEL(channame)': 'SIP/501-00000033',
+ 'CHANNEL(context)': 'from-internal',
+ 'CHANNEL(exten)': 's',
+ 'CHANNEL(linkedid)': '1729243964.366',
+ 'CHANNEL(uniqueid)': '1729244005.369',
+ 'CHANNEL(userfield)': '',
+ 'eventextra': '',
+ 'eventtime': '1729244014.225567',
+ 'eventtype': 'ANSWER',
+ 'userdeftype': ''}
+==========
+{'BRIDGEPEER': '',
+ 'CALLERID(ANI)': '+79217732247',
+ 'CALLERID(DNID)': '700',
+ 'CALLERID(RDNIS)': '',
+ 'CALLERID(name)': 'toSupport',
+ 'CALLERID(num)': '+79217732247',
+ 'CHANNEL(accountcode)': '',
+ 'CHANNEL(amaflags)': '3',
+ 'CHANNEL(appdata)': 'ki-support,mtr,,,30',
+ 'CHANNEL(appname)': 'Queue',
+ 'CHANNEL(channame)': 'SIP/550-00000032',
+ 'CHANNEL(context)': 'dial-to-specialist',
+ 'CHANNEL(exten)': 's',
+ 'CHANNEL(linkedid)': '1729243964.366',
+ 'CHANNEL(uniqueid)': '1729243964.366',
+ 'CHANNEL(userfield)': '',
+ 'eventextra': '{"bridge_id":"2a623bf9-d130-4156-a793-1896e39aadd9","bridge_technology":"simple_bridge"}',
+ 'eventtime': '1729244014.226247',
+ 'eventtype': 'BRIDGE_ENTER',
+ 'userdeftype': ''}
+==========
+{'BRIDGEPEER': 'SIP/550-00000032',
+ 'CALLERID(ANI)': '501',
+ 'CALLERID(DNID)': '',
+ 'CALLERID(RDNIS)': '',
+ 'CALLERID(name)': 'support-1',
+ 'CALLERID(num)': '501',
+ 'CHANNEL(accountcode)': '',
+ 'CHANNEL(amaflags)': '3',
+ 'CHANNEL(appdata)': '(Outgoing Line)',
+ 'CHANNEL(appname)': 'AppQueue',
+ 'CHANNEL(channame)': 'SIP/501-00000033',
+ 'CHANNEL(context)': 'from-internal',
+ 'CHANNEL(exten)': 's',
+ 'CHANNEL(linkedid)': '1729243964.366',
+ 'CHANNEL(uniqueid)': '1729244005.369',
+ 'CHANNEL(userfield)': '',
+ 'eventextra': '{"bridge_id":"2a623bf9-d130-4156-a793-1896e39aadd9","bridge_technology":"simple_bridge"}',
+ 'eventtime': '1729244014.226592',
+ 'eventtype': 'BRIDGE_ENTER',
+ 'userdeftype': ''}
+==========
+
+
+
+
+
+
+
+
+
+
+
+
+
+-> Разрыв соединения (положили трубку)
+{'BRIDGEPEER': 'SIP/550-00000032',
+ 'CALLERID(ANI)': '501',
+ 'CALLERID(DNID)': '',
+ 'CALLERID(RDNIS)': '',
+ 'CALLERID(name)': 'support-1',
+ 'CALLERID(num)': '501',
+ 'CHANNEL(accountcode)': '',
+ 'CHANNEL(amaflags)': '3',
+ 'CHANNEL(appdata)': '(Outgoing Line)',
+ 'CHANNEL(appname)': 'AppQueue',
+ 'CHANNEL(channame)': 'SIP/501-00000033',
+ 'CHANNEL(context)': 'from-internal',
+ 'CHANNEL(exten)': 's',
+ 'CHANNEL(linkedid)': '1729243964.366',
+ 'CHANNEL(uniqueid)': '1729244005.369',
+ 'CHANNEL(userfield)': '',
+ 'eventextra': '{"bridge_id":"2a623bf9-d130-4156-a793-1896e39aadd9","bridge_technology":"simple_bridge"}',
+ 'eventtime': '1729244021.476760',
+ 'eventtype': 'BRIDGE_EXIT',
+ 'userdeftype': ''}
+==========
+{'BRIDGEPEER': '',
+ 'CALLERID(ANI)': '+79217732247',
+ 'CALLERID(DNID)': '700',
+ 'CALLERID(RDNIS)': '',
+ 'CALLERID(name)': 'toSupport',
+ 'CALLERID(num)': '+79217732247',
+ 'CHANNEL(accountcode)': '',
+ 'CHANNEL(amaflags)': '3',
+ 'CHANNEL(appdata)': 'ki-support,mtr,,,30',
+ 'CHANNEL(appname)': 'Queue',
+ 'CHANNEL(channame)': 'SIP/550-00000032',
+ 'CHANNEL(context)': 'dial-to-specialist',
+ 'CHANNEL(exten)': 's',
+ 'CHANNEL(linkedid)': '1729243964.366',
+ 'CHANNEL(uniqueid)': '1729243964.366',
+ 'CHANNEL(userfield)': '',
+ 'eventextra': '{"bridge_id":"2a623bf9-d130-4156-a793-1896e39aadd9","bridge_technology":"simple_bridge"}',
+ 'eventtime': '1729244021.477071',
+ 'eventtype': 'BRIDGE_EXIT',
+ 'userdeftype': ''}
+==========
+{'BRIDGEPEER': '',
+ 'CALLERID(ANI)': '501',
+ 'CALLERID(DNID)': '',
+ 'CALLERID(RDNIS)': '',
+ 'CALLERID(name)': 'support-1',
+ 'CALLERID(num)': '501',
+ 'CHANNEL(accountcode)': '',
+ 'CHANNEL(amaflags)': '3',
+ 'CHANNEL(appdata)': '(Outgoing Line)',
+ 'CHANNEL(appname)': 'AppQueue',
+ 'CHANNEL(channame)': 'SIP/501-00000033',
+ 'CHANNEL(context)': 'from-internal',
+ 'CHANNEL(exten)': 's',
+ 'CHANNEL(linkedid)': '1729243964.366',
+ 'CHANNEL(uniqueid)': '1729244005.369',
+ 'CHANNEL(userfield)': '',
+ 'eventextra': '{"dialstatus":"","hangupcause":16,"hangupsource":"SIP/501-00000033"}',
+ 'eventtime': '1729244021.477335',
+ 'eventtype': 'HANGUP',
+ 'userdeftype': ''}
+==========
+{'BRIDGEPEER': '',
+ 'CALLERID(ANI)': '501',
+ 'CALLERID(DNID)': '',
+ 'CALLERID(RDNIS)': '',
+ 'CALLERID(name)': 'support-1',
+ 'CALLERID(num)': '501',
+ 'CHANNEL(accountcode)': '',
+ 'CHANNEL(amaflags)': '3',
+ 'CHANNEL(appdata)': '(Outgoing Line)',
+ 'CHANNEL(appname)': 'AppQueue',
+ 'CHANNEL(channame)': 'SIP/501-00000033',
+ 'CHANNEL(context)': 'from-internal',
+ 'CHANNEL(exten)': 's',
+ 'CHANNEL(linkedid)': '1729243964.366',
+ 'CHANNEL(uniqueid)': '1729244005.369',
+ 'CHANNEL(userfield)': '',
+ 'eventextra': '',
+ 'eventtime': '1729244021.477469',
+ 'eventtype': 'CHAN_END',
+ 'userdeftype': ''}
+==========
+{'BRIDGEPEER': '',
+ 'CALLERID(ANI)': '+79217732247',
+ 'CALLERID(DNID)': '700',
+ 'CALLERID(RDNIS)': '',
+ 'CALLERID(name)': 'toSupport',
+ 'CALLERID(num)': '+79217732247',
+ 'CHANNEL(accountcode)': '',
+ 'CHANNEL(amaflags)': '3',
+ 'CHANNEL(appdata)': '',
+ 'CHANNEL(appname)': '',
+ 'CHANNEL(channame)': 'SIP/550-00000032',
+ 'CHANNEL(context)': 'dial-to-specialist',
+ 'CHANNEL(exten)': 's',
+ 'CHANNEL(linkedid)': '1729243964.366',
+ 'CHANNEL(uniqueid)': '1729243964.366',
+ 'CHANNEL(userfield)': '',
+ 'eventextra': '{"dialstatus":"ANSWER","hangupcause":16,"hangupsource":"SIP/501-00000033"}',
+ 'eventtime': '1729244021.477881',
+ 'eventtype': 'HANGUP',
+ 'userdeftype': ''}
+==========
+{'BRIDGEPEER': '',
+ 'CALLERID(ANI)': '+79217732247',
+ 'CALLERID(DNID)': '700',
+ 'CALLERID(RDNIS)': '',
+ 'CALLERID(name)': 'toSupport',
+ 'CALLERID(num)': '+79217732247',
+ 'CHANNEL(accountcode)': '',
+ 'CHANNEL(amaflags)': '3',
+ 'CHANNEL(appdata)': '',
+ 'CHANNEL(appname)': '',
+ 'CHANNEL(channame)': 'SIP/550-00000032',
+ 'CHANNEL(context)': 'dial-to-specialist',
+ 'CHANNEL(exten)': 's',
+ 'CHANNEL(linkedid)': '1729243964.366',
+ 'CHANNEL(uniqueid)': '1729243964.366',
+ 'CHANNEL(userfield)': '',
+ 'eventextra': '',
+ 'eventtime': '1729244021.478177',
+ 'eventtype': 'CHAN_END',
+ 'userdeftype': ''}
+==========
+{'BRIDGEPEER': '',
+ 'CALLERID(ANI)': '+79217732247',
+ 'CALLERID(DNID)': '700',
+ 'CALLERID(RDNIS)': '',
+ 'CALLERID(name)': 'toSupport',
+ 'CALLERID(num)': '+79217732247',
+ 'CHANNEL(accountcode)': '',
+ 'CHANNEL(amaflags)': '3',
+ 'CHANNEL(appdata)': '',
+ 'CHANNEL(appname)': '',
+ 'CHANNEL(channame)': 'SIP/550-00000032',
+ 'CHANNEL(context)': 'dial-to-specialist',
+ 'CHANNEL(exten)': 's',
+ 'CHANNEL(linkedid)': '1729243964.366',
+ 'CHANNEL(uniqueid)': '1729243964.366',
+ 'CHANNEL(userfield)': '',
+ 'eventextra': '',
+ 'eventtime': '1729244021.480639',
+ 'eventtype': 'LINKEDID_END',
+ 'userdeftype': ''}
+==========
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Process finished with exit code 0

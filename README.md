@@ -4,11 +4,13 @@
 
 ```js
 {
-    "phone": "1234567890", // Строка с номером телефона
-    "action": "action",    // Действие new|speak|done
-    "time": 1234567890,    // UNIX timestamp события
-    "status": "status",    // Статус user|forced|kvartira|chasny|...
-    "data": {}             // Дополнительные данные 
+    "phone": "1234567890",          // Строка с номером телефона
+    "action": "action",             // Действие new|speak|done
+    "time": 1234567890,             // UNIX timestamp события
+    "status": "status",             // Статус user|forced|kvartira|chasny|...
+    "event_id: "1729243964.366",    // Идентификатор события
+    "support_id": "501",            // Идентификатор телефона
+    "data": {}                      // Дополнительные данные 
 }
 ```
 

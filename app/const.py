@@ -18,6 +18,9 @@ DB_PATH = SRC_DIR / "Baza.db"
 
 # ===========================================
 
+PROFILE_URL = "https://h.kolt-internet.ru/subjects/persons/edit/"
+""" Первая часть URL для перехода в профиль. """
+
 RE_AUTH_HYDRA_DELAY = timedelta(hours=1)
 """ Промежутки времени, по истечении которых необходимо
 переподключиться к Hydra.
