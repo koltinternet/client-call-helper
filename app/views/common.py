@@ -28,6 +28,8 @@ __all__ = (
 @routes.get("/")
 @aiohttp_jinja2.template("index.html")
 async def index(request: Request) -> dict:
+    """ Возвращает основную страницу сайта.
+    """
 
     ctx = await default_context(request)
 
@@ -39,14 +41,18 @@ async def index(request: Request) -> dict:
     return ctx
 
 
-async def call_hydra(session: CallSession) -> None:
+async def call_hydra(call_session: CallSession) -> None:
     """ Выполняет запросы к Гидре.
+    :param call_session: Событие сессии, которое будет
+    обогащено данными из Гидры.
     """
-    # ? Помечаем событие как обновлённое из Гидры
-    data = dict()
-
-    search_result = await HYDRA.search(session.phone[-10:])
+    # ? Выполняем поиск пользователя по последним 10 символам
+    # ? 921-123-45-67
+    search_result = await HYDRA.search(call_session.phone[-10:])
     if search_entry := search_result.get_entry():
+        # ? Помечаем событие как обновлённое из Гидры
+        call_session.action = "hydra"
+
         customer_result = await HYDRA.get_customer(
             search_entry.user_second_id)
 
@@ -54,7 +60,7 @@ async def call_hydra(session: CallSession) -> None:
         address_result = await HYDRA.get_addresses(
             customer.user_first_id)
 
-        data.update(
+        call_session.data = HydraData(
             login=search_entry.login,
             phone=search_entry.phone,
             profile_url=PROFILE_URL + str(search_entry.user_second_id),
@@ -65,8 +71,9 @@ async def call_hydra(session: CallSession) -> None:
             addresses=address_result.get_hydra_addresses()
         )
 
-    session.action = "hydra"
-    session.data = HydraData(**data)
+    else:
+        # ? Помечаем событие как "не найдено в Гидре"
+        call_session.action = "hydra_empty"
 
     await ACTIVE_SESSIONS.render()
 
@@ -77,38 +84,89 @@ async def action(request: Request) -> Response:
     транслирует их в сокеты.
     """
 
-    action: PhoneMessage = await request.json(
+    phone_message: PhoneMessage = await request.json(
         loads=action_decoder.decode
     )
-    # log.info(f"Входящее событие: {action}")
-    pprint(action)
-    print("=" * 10)
+    # pprint(phone_message)
+    # print("=" * 10)
 
-    # for ws in SOCKETS:
-    #     await ws.send_json(action)
-    #
+    match get_message_signature(phone_message):
 
-    if action.context == "ivr-welcome":
-        # ? Получаем номер телефона начиная с девятки,
-        # ? на случай конфликта между восьмёркой и семёркой
+        case "welcome":
+            call_session = CallSession(
+                phone=phone_message.caller_id_num,
+                action="welcome",
+                status="",
+                time=datetime.fromtimestamp(
+                    float(phone_message.event_time)),
+                event_id=phone_message.linked_id,
+                support_id=""
+            )
 
-        call_session = CallSession(
-            phone=action.caller_id_num,
-            action="new",
-            status="",
-            time=datetime.fromtimestamp(float(action.event_time)),
-            event_id=action.linked_id,
-            support_id=""
-        )
+            await ACTIVE_SESSIONS.add_session(call_session)
 
-        await ACTIVE_SESSIONS.add_session(call_session)
+            await spawn(
+                request=request,
+                coro=call_hydra(call_session))
 
-        await spawn(
-            request=request,
-            coro=call_hydra(call_session)
-        )
+        case "calling":
+            log.debug(f"Статус звонка: <green>{phone_message.caller_id_name}</>")
+            await ACTIVE_SESSIONS.update_status_n_support_id(
+                status=phone_message.caller_id_name,
+                support_id=phone_message.caller_id_num,
+                event_id=phone_message.linked_id)
+
+        case "answered":
+            await ACTIVE_SESSIONS.update_action(
+                action="speak",
+                event_id=phone_message.linked_id)
+
+        case "done":
+            await ACTIVE_SESSIONS.remove_session(
+                event_id=phone_message.linked_id
+            )
+
+        # TODO:
+        # case "missed":
+        #     await ACTIVE_SESSIONS.remove_session(
+        #         event_id=action.linked_id
+        #     )
 
     return Response(text="ok", status=200)
+
+
+def get_message_signature(phone_message: PhoneMessage) -> str | None:
+    """ Вычисляет действие события.
+    :param phone_message: Событие, пришедшее из телефонии.
+    """
+    # ? Пользователь дозвонился на ИВР.
+    # ? В тональном режиме выбирает статус обращения.
+    if phone_message.context == "ivr-welcome":
+        return "welcome"
+
+    if phone_message.context == "from-internal":
+        # ? Пользователь определился со статусом обращения и
+        # ? был переключен на дозвон в службу поддержки по
+        # ? одному из соответствующих номеров.
+        # ? Может быть получен ID телефонного аппарата, куда
+        # ? был перенаправлен звонок, а так же статус обращения.
+        if phone_message.event_type == "CHAN_START":
+            return "calling"
+
+        # ? Оператор взял трубку и отвечает на звонок.
+        if phone_message.event_type == "ANSWER":
+            return "answered"
+
+        # ? Звонок завершен.
+        if phone_message.event_type == "BRIDGE_EXIT":
+            return "done"
+
+        # TODO:
+        # # ? Звонок пропущен.
+        # if action.event_type == "BRIDGE_MISSED":
+        #     return "missed"
+
+    return None
 
 
 @routes.get("/ws")
@@ -121,6 +179,9 @@ async def ws_loop(request: Request) -> WebSocketResponse:
     # log.debug(f"<red>{ws}-connected</>")
 
     SOCKETS.append(ws)
+    await ws.send_json(
+        ACTIVE_SESSIONS.sessions
+    )
 
     async for msg in ws:
         # log.debug(f"<red>{ws}-message</>: {msg}")
