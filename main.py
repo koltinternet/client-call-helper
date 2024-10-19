@@ -94,7 +94,7 @@ def create_app(testing: bool = False) -> web.Application:
     # if testing:
     #     TORTOISE_CONFIG["connections"]["default"] = SQLITE_DB_ENV
 
-    register_tortoise(application, config=TORTOISE_CONFIG, generate_schemas=True)
+    # register_tortoise(application, config=TORTOISE_CONFIG, generate_schemas=True)
 
     setup_app(application)
 
