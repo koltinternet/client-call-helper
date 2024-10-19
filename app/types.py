@@ -3,7 +3,7 @@ from aiohttp import ClientSession, ClientResponseError, request, ClientTimeout
 
 from app_config import HYDRA_USER, HYDRA_PASSWORD
 from app.const import log, RE_AUTH_HYDRA_DELAY, SOCKETS
-from msgspec import json, field, to_builtins
+from msgspec import json, field
 from datetime import datetime
 
 
@@ -35,28 +35,45 @@ class PhoneMessage(Struct):
 
 class HydraAddress(Struct):
     data: str
+    """ Данные адреса/контакта """
     title: str
+    """ Наименование """
 
 
 class HydraData(Struct):
     login: str
+    """ Логин """
     phone: str
+    """ Номер телефона """
     profile_url: str
+    """ URL профиля в Гидре """
     full_name: str
+    """ Полное имя """
     short_name: str
+    """ Фамилия И.О. """
     created_date: str
+    """ Дата регистрации """
     firm_id: int = 0
+    """ ?!? """
     addresses: list[HydraAddress] = []
+    """ Список адресов/контактов """
 
 
 class CallSession(Struct):
     phone: str
+    """ Номер телефона """
     action: str
+    """ Действие welcome|calling|answered|done|missed """
     status: str
+    """ Статус user|forced|kvartira|chasny|... """
     time: datetime
+    """ Время события """
     event_id: str
+    """ ID события """
     support_id: str
+    """ ID телефонного аппарата поддержки """
     data: HydraData | None = None
+    """ Данные об учётке из Гидры """
 
 
 class ActiveCallSessions:
@@ -88,43 +105,41 @@ class ActiveCallSessions:
                 session.action = action
                 await self.render()
 
-    async def update_status(self, status: str, event_id: str) -> None:
-        """ Обновляет статус в сессии.
+    async def update_status_n_support_id(
+            self, status: str,
+            support_id: str,
+            event_id: str) -> None:
+        """ Обновляет статус обращения и ID телефонного аппарата,
+        на который был перенаправлен звонок.
         :param status: Статус user|forced|kvartira|chasny|...
+        :param support_id: ID телефонного аппарата поддержки.
         :param event_id: ID события.
         """
         for session in self.sessions:
             if session.event_id == event_id:
+                session.action = "calling"
                 session.status = status
-                await self.render()
-
-    async def update_support_id(self, support_id: str, event_id: str) -> None:
-        """ Обновляет ID поддержки в сессии.
-        :param support_id: ID поддержки.
-        :param event_id: ID события.
-        """
-        for session in self.sessions:
-            if session.event_id == event_id:
                 session.support_id = support_id
                 await self.render()
 
     async def render(self) -> None:
         """ Отправляет состояния сессий в сокеты. """
-        data = [
-            to_builtins(session)
-            for session in self.sessions
-        ]
+        data = (json.encode(self.sessions)
+                .decode("utf-8"))
 
         for ws in SOCKETS:
-            await ws.send_json(data)
+            await ws.send_str(data)
 
 
 class HydraSearchEntry(Struct):
     # n_entity_id: int
     # vc_entity_role: str
-    user_second_id: int = field(name="n_result_id")         # ? ID второй вкладки в Гидре
-    login: str = field(name="vc_result_name")               # ? Логин
-    phone: str = field(name="cl_highlighted_query_result")  # ? Номер телефона
+    user_second_id: int = field(name="n_result_id")
+    """ ID второй вкладки в Гидре """
+    login: str = field(name="vc_result_name")
+    """ Логин """
+    phone: str = field(name="cl_highlighted_query_result")
+    """ Номер телефона """
     # vc_entity_type: str
     # vc_result_type: str
     # vc_result_subtype: str
@@ -141,16 +156,22 @@ class HydraSearch(Struct):
 class HydraCustomerEntry(Struct):
     # n_subject_id: int
     # n_customer_id: int
-    user_first_id: int = field(name="n_base_subject_id")    # ? ID первой вкладки в Гидре
-    full_name: str = field(name="vc_base_subject_name")     # ? ФИО полностью
+    user_first_id: int = field(name="n_base_subject_id")
+    """ ID первой вкладки в Гидре """
+    full_name: str = field(name="vc_base_subject_name")
+    """ ФИО полностью """
     # n_base_subj_type_id: int
     # n_subj_state_id: int
-    short_name: str = field(name="vc_name")                 # ? Фамилия И.О.
-    login: str = field(name="vc_code")                      # ? Логин
-    created_date: str = field(name="d_created")             # ? Дата создания
+    short_name: str = field(name="vc_name")
+    """ Фамилия И.О. """
+    login: str = field(name="vc_code")
+    """ Логин """
+    created_date: str = field(name="d_created")
+    """ Дата создания учётки """
     # t_tags: list
     # vc_rem: str
     firm_id: int = field(name="n_firm_id")  # !
+    """ ?!? """
     # n_subj_group_id: int
     # n_reseller_id: int
     # group_ids: list
@@ -167,10 +188,13 @@ class HydraCustomers(Struct):
 
 class HydraAddressEntry(Struct):
     # n_address_id: int
-    addr_type_id: int = field(name="n_addr_type_id")    # ? ID типа:
-                                                        # ?     13006 - телефон
-                                                        # ?     1006 - адрес проживания
-    data: str = field(name="vc_visual_code")    # ? Данные
+    addr_type_id: int = field(name="n_addr_type_id")
+    """ ID типа адреса:
+        1006 - адрес проживания
+        13006 - телефон
+    """
+    data: str = field(name="vc_visual_code")
+    """ Данные адреса """
     # n_par_addr_id: int
     # vc_code: str
     # vc_address: str
@@ -185,7 +209,8 @@ class HydraAddressEntry(Struct):
     # n_addr_state_id: int
     # vc_rem: str
     # n_bind_addr_id: int
-    title: str = field(name="vc_subj_addr_type_name")   # ? Наименование поля
+    title: str = field(name="vc_subj_addr_type_name")
+    """ Наименование типа адреса """
     # d_begin: str
     # d_end: str
     # c_fl_main: str
@@ -236,6 +261,7 @@ class Hydra:
         """ Выполняет авторизацию в Гидре,
         запоминая время.
         """
+        await self.done()
         token = await self.get_auth_token()
 
         self.session = ClientSession(
@@ -252,7 +278,10 @@ class Hydra:
         }
 
     async def done(self) -> None:
-        if not self.session.closed:
+        """ Необходимо выполнить при завершении работы!
+        Закрывает сессию.
+        """
+        if self.session and not self.session.closed:
             await self.session.close()
 
     @classmethod
@@ -284,7 +313,8 @@ class Hydra:
         """ Выполняет запрос к Гидре, проверяя время
         авторизации и авторизует, если время сессии истекло."""
 
-        if not self.auth_time or datetime.now() - self.auth_time > RE_AUTH_HYDRA_DELAY:
+        if not self.auth_time or (
+                datetime.now() - self.auth_time > RE_AUTH_HYDRA_DELAY):
             log.debug("Авторизация в Гидре")
             await self.make_auth()
 
