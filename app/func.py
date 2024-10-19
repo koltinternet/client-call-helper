@@ -13,7 +13,6 @@ from app.const import (
     SRC_DIR,
     LOGS_DIR,
 )
-from app.types import PhoneMessage
 
 
 async def create_default_paths() -> None:
