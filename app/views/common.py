@@ -4,7 +4,7 @@ from aiojobs.aiohttp import spawn
 import aiohttp_jinja2
 from aiohttp.web import Request, Response, RouteTableDef, WebSocketResponse
 # from aiohttp_session import get_session
-from app.func import default_context
+from app.func import default_context, simple_json_encoder
 from app.const import log, SOCKETS, PROFILE_URL
 from app.types import (
     PhoneMessage,
@@ -50,8 +50,6 @@ async def call_hydra(call_session: CallSession) -> None:
     # ? 921-123-45-67
     search_result = await HYDRA.search(call_session.phone[-10:])
     if search_entry := search_result.get_entry():
-        # ? Помечаем событие как обновлённое из Гидры
-        call_session.action = "hydra"
 
         customer_result = await HYDRA.get_customer(
             search_entry.user_second_id)
@@ -70,10 +68,6 @@ async def call_hydra(call_session: CallSession) -> None:
             firm_id=customer.firm_id,
             addresses=address_result.get_hydra_addresses()
         )
-
-    else:
-        # ? Помечаем событие как "не найдено в Гидре"
-        call_session.action = "hydra_empty"
 
     await ACTIVE_SESSIONS.render()
 
@@ -178,9 +172,22 @@ async def ws_loop(request: Request) -> WebSocketResponse:
     await ws.prepare(request)
     # log.debug(f"<red>{ws}-connected</>")
 
+    # actions = [
+    #     CallSession(
+    #         phone="+79217809021",
+    #         action="welcome",
+    #         status="user",
+    #         time=datetime.now(),
+    #         event_id="1729243964.366",
+    #         support_id="501",
+    #     )
+    # ]
+
     SOCKETS.append(ws)
     await ws.send_json(
-        ACTIVE_SESSIONS.sessions
+        ACTIVE_SESSIONS.sessions,
+        # actions,
+        dumps=simple_json_encoder
     )
 
     async for msg in ws:
