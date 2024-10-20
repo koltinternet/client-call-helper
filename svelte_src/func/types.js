@@ -1,28 +1,35 @@
 /**
- * @typedef {object} ActionMessageData
- * @property {number} id - идентификатор
- * @property {string} phone - номер телефона
- * @property {string} name - имя
- * @property {string} last_name - фамилия
- * @property {string} middle_name - отчество
- * @property {string} state - состояние абонента
- * @property {string} address - адрес
+ * @typedef {object} HydraAddress
+ * @property {string} data - данные адреса/контакта
+ * @property {string} title - наименование
  */
-
 
 /**
- * @typedef {object} ActionMessage
- * @property {number} id - идентификатор
+ * @typedef {object} HydraData
+ * @property {string} login - логин пользователя
  * @property {string} phone - номер телефона
- * @property {string} action - действие new|speak|done
- * @property {number} time - UNIX timestamp события
+ * @property {string} profile_url - URL профиля в Гидре
+ * @property {string} full_name - полное имя
+ * @property {string} short_name - сокращенное имя
+ * @property {string} created_date - дата регистрации
+ * @property {number} firm_id - неизвестный параметр
+ * @property {HydraAddress[]} addresses - адреса
+ */
+
+/**
+ * @typedef {object} CallSession
+ * @property {string} phone - номер телефона
+ * @property {string} action - действие welcome|calling|answered|done|missed
  * @property {string} status - статус user|forced|kvartira|chasny|...
- * @property {ActionMessageData} data - дополнительные данные
+ * @property {string} time - datetime
+ * @property {string} event_id - ID события
+ * @property {string} support_id - ID телефонного аппарата
+ * @property {HydraData} data - данные пользователя из Hydra
  */
 
 
-const ActionMessage = {};
+const CallSession = {};
 
 export {
-    ActionMessage
+    CallSession
 };
