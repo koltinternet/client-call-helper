@@ -4,7 +4,7 @@ from aiojobs.aiohttp import spawn
 import aiohttp_jinja2
 from aiohttp.web import Request, Response, RouteTableDef, WebSocketResponse
 # from aiohttp_session import get_session
-from app.func import default_context, simple_json_encoder
+from app.func import default_context, simple_json_encoder, event_log_write
 from app.const import log, SOCKETS, PROFILE_URL
 from app.types import (
     PhoneMessage,
@@ -84,10 +84,15 @@ async def action(request: Request) -> Response:
     """ Принимает json с описанием события и
     транслирует их в сокеты.
     """
+    raw_message = await request.read()
+    phone_message = action_decoder.decode(raw_message)
 
-    phone_message: PhoneMessage = await request.json(
-        loads=action_decoder.decode
-    )
+    await event_log_write(raw_message, phone_message.linked_id)
+
+    # phone_message: PhoneMessage = await request.json(
+    #     loads=action_decoder.decode
+    # )
+
     pprint(phone_message)
     print("=" * 10)
 
@@ -106,6 +111,10 @@ async def action(request: Request) -> Response:
 
             await ACTIVE_SESSIONS.add_session(call_session)
 
+            await event_log_write(
+                "\n========== welcome ==========\n",
+                phone_message.linked_id)
+
             await spawn(
                 request=request,
                 coro=call_hydra(call_session))
@@ -116,21 +125,33 @@ async def action(request: Request) -> Response:
                 status=phone_message.caller_id_name,
                 support_id=phone_message.caller_id_num,
                 event_id=phone_message.linked_id)
+            await event_log_write(
+                "\n========== calling ==========\n",
+                phone_message.linked_id)
 
         case "answered":
             await ACTIVE_SESSIONS.update_action(
                 action="speak",
                 event_id=phone_message.linked_id)
+            await event_log_write(
+                "\n========== answered ==========\n",
+                phone_message.linked_id)
 
         case "done":
             await ACTIVE_SESSIONS.remove_session(
                 event_id=phone_message.linked_id
             )
+            await event_log_write(
+                "\n========== done ==========\n",
+                phone_message.linked_id)
 
         case "missed":
             await ACTIVE_SESSIONS.remove_session(
                 event_id=phone_message.linked_id
             )
+            await event_log_write(
+                "\n========== missed ==========\n",
+                phone_message.linked_id)
 
     return Response(text="ok", status=200)
 
