@@ -3,7 +3,7 @@
 from aiohttp.web import Response, Request
 from datetime import datetime
 
-# from aiopath import AsyncPath
+from aiopath import AsyncPath
 from msgspec import json
 
 
@@ -13,6 +13,20 @@ from app.const import (
     SRC_DIR,
     LOGS_DIR,
 )
+
+
+async def event_log_write(data: bytes | str, event_time: str) -> None:
+    """ Записывает данные в лог, для каждого события.
+    :param data: Данные для записи.
+    :param event_time: Время события. Временная метка из "CHANNEL(linkedid)".
+    """
+    # ? "1729243964.366" -> "2024-10-18 12_32_44"
+    name = (str(datetime.fromtimestamp(float(event_time))
+             .replace(microsecond=0)).replace(":", "_"))
+
+    file: AsyncPath = LOGS_DIR / name
+    async with file.open("a", encoding="utf-8") as f:
+        await f.write(data + "\n")
 
 
 async def create_default_paths() -> None:
