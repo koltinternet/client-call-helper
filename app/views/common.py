@@ -13,15 +13,20 @@ from app.types import (
     CallSession,
     HydraData,
 )
-from msgspec.json import Decoder
+from msgspec import json
 from pprint import pprint
 
 
 routes = RouteTableDef()
-action_decoder = Decoder(PhoneMessage)
+action_decoder = json.Decoder(PhoneMessage)
 
 __all__ = (
     "routes",
+)
+CONTEXT_NAMES = (
+    "dial-to-specialist",
+    "fast-support",
+    "from-internal"
 )
 
 
@@ -68,6 +73,8 @@ async def call_hydra(call_session: CallSession) -> None:
             firm_id=customer.firm_id,
             addresses=address_result.get_hydra_addresses()
         )
+    else:
+        call_session.data = {}
 
     await ACTIVE_SESSIONS.render()
 
@@ -81,8 +88,8 @@ async def action(request: Request) -> Response:
     phone_message: PhoneMessage = await request.json(
         loads=action_decoder.decode
     )
-    # pprint(phone_message)
-    # print("=" * 10)
+    pprint(phone_message)
+    print("=" * 10)
 
     match get_message_signature(phone_message):
 
@@ -120,11 +127,10 @@ async def action(request: Request) -> Response:
                 event_id=phone_message.linked_id
             )
 
-        # TODO:
-        # case "missed":
-        #     await ACTIVE_SESSIONS.remove_session(
-        #         event_id=action.linked_id
-        #     )
+        case "missed":
+            await ACTIVE_SESSIONS.remove_session(
+                event_id=phone_message.linked_id
+            )
 
     return Response(text="ok", status=200)
 
@@ -133,17 +139,24 @@ def get_message_signature(phone_message: PhoneMessage) -> str | None:
     """ Вычисляет действие события.
     :param phone_message: Событие, пришедшее из телефонии.
     """
+
     # ? Пользователь дозвонился на ИВР.
     # ? В тональном режиме выбирает статус обращения.
     if phone_message.context == "ivr-welcome":
-        return "welcome"
+        if phone_message.event_type == "ANSWER":
+            return "welcome"
 
-    if phone_message.context == "from-internal":
+        if phone_message.event_type == "CHAN_END":
+            log.debug(f"Звонок прерван с:\n\tcontext=<red>ivr-welcome</>\n\t"
+                      f"event_type=<red>{phone_message.event_type}</>")
+            return "done"
+
+    if phone_message.context in CONTEXT_NAMES:
         # ? Пользователь определился со статусом обращения и
         # ? был переключен на дозвон в службу поддержки по
         # ? одному из соответствующих номеров.
         # ? Может быть получен ID телефонного аппарата, куда
-        # ? был перенаправлен звонок, а так же статус обращения.
+        # ? был перенаправлен звонок.
         if phone_message.event_type == "CHAN_START":
             return "calling"
 
@@ -152,13 +165,21 @@ def get_message_signature(phone_message: PhoneMessage) -> str | None:
             return "answered"
 
         # ? Звонок завершен.
-        if phone_message.event_type == "BRIDGE_EXIT":
+        if phone_message.event_type == "HANGUP":
+            log.debug(f"Звонок завершен с:\n\tcontext=<red>{phone_message.context}</>\n\t"
+                      f"event_type=<red>{phone_message.event_type}</>")
             return "done"
 
-        # TODO:
-        # # ? Звонок пропущен.
-        # if action.event_type == "BRIDGE_MISSED":
-        #     return "missed"
+        if phone_message.event_extra:
+            extra: dict[str, str | int] = json.decode(
+                phone_message.event_extra)
+            # ? Звонок пропущен. CANCEL|NOANSWER|BUSY
+            if extra.get("dialstatus", "-EMPTY-") in (
+                    "CANCEL", "NOANSWER", "BUSY"):
+                log.debug(f"Звонок пропущен с:\n\textra=<red>{extra}</>\n\t"
+                          f"context=<red>{phone_message.context}</>\n\t"
+                          f"event_type=<red>{phone_message.event_type}</>")
+                return "missed"
 
     return None
 

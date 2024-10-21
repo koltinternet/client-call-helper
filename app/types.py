@@ -72,7 +72,7 @@ class CallSession(Struct):
     """ ID события """
     support_id: str
     """ ID телефонного аппарата поддержки """
-    data: HydraData | None = None
+    data: HydraData | dict | None = None
     """ Данные об учётке из Гидры """
 
 
@@ -93,7 +93,7 @@ class ActiveCallSessions:
         for i, session in enumerate(self.sessions):
             if session.event_id == event_id:
                 del self.sessions[i]
-        await self.render()
+                await self.render()
 
     async def update_action(self, action: str, event_id: str) -> None:
         """ Обновляет действие в сессии.
@@ -276,6 +276,7 @@ class Hydra:
             "GET": self.session.get,    #type: ignore
             "POST": self.session.post,  #type: ignore
         }
+        log.debug("Выполнена авторизация в Гидре")
 
     async def done(self) -> None:
         """ Необходимо выполнить при завершении работы!
@@ -315,7 +316,6 @@ class Hydra:
 
         if not self.auth_time or (
                 datetime.now() - self.auth_time > RE_AUTH_HYDRA_DELAY):
-            log.debug("Авторизация в Гидре")
             await self.make_auth()
 
         if not (executor := self.executors.get(method)):
