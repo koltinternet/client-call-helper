@@ -8,17 +8,7 @@
     const ws_url = "ws:" + window.location.host + "/ws";
     
     /** @type CallSession[] */
-    let actions = [{
-        phone: "+79217809021",
-        action: "welcome",
-        status: "user",
-        time: new Date(),
-        event_id: "1729243964.366",
-        support_id: "501",
-        data: {}
-    }];
-
-    // let msg_id = 0;
+    let actions = [];
     
     // =============================================================
 
@@ -89,6 +79,11 @@
         //     type: "join",
         //     data: {msg: ""}
         // }))
+        Alert.info(
+            "WS-сервер подключился.",
+            "Соединение установлено.",
+            10
+        )
     }
 
     /**
@@ -110,7 +105,12 @@
      * @return {void}
     */
     function handlerWSClose(event) {
-        console.log("WS close: ", event);
+        // console.log("WS close: ", event);
+        Alert.warning(
+            "WS-сервер закрыл соединение.<br>Пытаюсь переподключиться ...",
+            "Соединение закрыто.",
+        );
+        retryWS();
     }
 
     /**
@@ -149,8 +149,21 @@
         window.open(action.data.profile_url, '_blank');
     }
 
+    /**
+     * Пытается повторить подключение к ws.
+     * @return {void}
+    */
+    function retryWS() {
+        socket = null;
+        try {
+            makeWS();
+        } catch (error) {
+            console.log(error);
+        }
+    }
+
     onMount(() => {
-        makeWS();
+        retryWS();
     });
 
 </script>
@@ -174,6 +187,7 @@
                 <div class="action-type">{action.action}</div>
                 <div class="action-body">
                     <div class="phone">{action.phone}</div>
+                    <div class="event-id">{action.event_id}</div>
                     <div class="status">{action.status}</div>
 
                     {#if action.data === null}

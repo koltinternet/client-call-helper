@@ -15,7 +15,7 @@ from app.const import (
 )
 
 
-async def event_log_write(data: bytes | str, event_time: str) -> None:
+async def event_log_write(data: str, event_time: str) -> None:
     """ Записывает данные в лог, для каждого события.
     :param data: Данные для записи.
     :param event_time: Время события. Временная метка из "CHANNEL(linkedid)".
@@ -26,7 +26,7 @@ async def event_log_write(data: bytes | str, event_time: str) -> None:
 
     file: AsyncPath = LOGS_DIR / name
     async with file.open("a", encoding="utf-8") as f:
-        await f.write(data + "\n")
+        await f.write(data + "\n\n")
 
 
 async def create_default_paths() -> None:

@@ -25,6 +25,7 @@ __all__ = (
 )
 CONTEXT_NAMES = (
     "dial-to-specialist",
+    "dial-to-artem",
     "fast-support",
     "from-internal"
 )
@@ -66,7 +67,7 @@ async def call_hydra(call_session: CallSession) -> None:
         call_session.data = HydraData(
             login=search_entry.login,
             phone=search_entry.phone,
-            profile_url=PROFILE_URL + str(search_entry.user_second_id),
+            profile_url=PROFILE_URL + str(customer.user_first_id),
             full_name=customer.full_name,
             short_name=customer.short_name,
             created_date=customer.created_date,
@@ -84,7 +85,7 @@ async def action(request: Request) -> Response:
     """ Принимает json с описанием события и
     транслирует их в сокеты.
     """
-    raw_message = await request.read()
+    raw_message = await request.text()
     phone_message = action_decoder.decode(raw_message)
 
     await event_log_write(raw_message, phone_message.linked_id)
@@ -162,45 +163,62 @@ def get_message_signature(phone_message: PhoneMessage) -> str | None:
     """
 
     # ? Пользователь дозвонился на ИВР.
+    # ? ivr-welcome|ivr-main
     # ? В тональном режиме выбирает статус обращения.
-    if phone_message.context == "ivr-welcome":
-        if phone_message.event_type == "ANSWER":
-            return "welcome"
+    ivr = phone_message.context.startswith("ivr-")
+    if ivr or phone_message.context == "incoming":
+        match phone_message.event_type:
+            case "ANSWER":
+                return "welcome"
 
-        if phone_message.event_type == "CHAN_END":
-            log.debug(f"Звонок прерван с:\n\tcontext=<red>ivr-welcome</>\n\t"
-                      f"event_type=<red>{phone_message.event_type}</>")
-            return "done"
+            case "HANGUP":
+                log.debug(f"Звонок прерван с:\n\tcontext=<red>{phone_message.context}</>\n\t"
+                          f"event_type=<red>{phone_message.event_type}</>")
+                return "done"
+
+    extra = {}
+    if phone_message.event_extra:
+        extra: dict[str, str | int] = json.decode(
+            phone_message.event_extra)
 
     if phone_message.context in CONTEXT_NAMES:
-        # ? Пользователь определился со статусом обращения и
-        # ? был переключен на дозвон в службу поддержки по
-        # ? одному из соответствующих номеров.
-        # ? Может быть получен ID телефонного аппарата, куда
-        # ? был перенаправлен звонок.
-        if phone_message.event_type == "CHAN_START":
-            return "calling"
 
-        # ? Оператор взял трубку и отвечает на звонок.
-        if phone_message.event_type == "ANSWER":
-            return "answered"
+        match phone_message.event_type:
 
-        # ? Звонок завершен.
-        if phone_message.event_type == "HANGUP":
-            log.debug(f"Звонок завершен с:\n\tcontext=<red>{phone_message.context}</>\n\t"
-                      f"event_type=<red>{phone_message.event_type}</>")
-            return "done"
+            # ? Пользователь определился со статусом обращения и
+            # ? был переключен на дозвон в службу поддержки по
+            # ? одному из соответствующих номеров.
+            # ? Может быть получен ID телефонного аппарата, куда
+            # ? был перенаправлен звонок.
+            case "CHAN_START":
+                return "calling"
 
-        if phone_message.event_extra:
-            extra: dict[str, str | int] = json.decode(
-                phone_message.event_extra)
-            # ? Звонок пропущен. CANCEL|NOANSWER|BUSY
-            if extra.get("dialstatus", "-EMPTY-") in (
-                    "CANCEL", "NOANSWER", "BUSY"):
-                log.debug(f"Звонок пропущен с:\n\textra=<red>{extra}</>\n\t"
-                          f"context=<red>{phone_message.context}</>\n\t"
+            # ? Oператор взял трубку и отвечает на звонок.
+            case "ANSWER":
+                return "answered"
+
+            # ? Звонок завершен.
+            case "HANGUP":
+
+                # ? Звонок переадресован на другой телефон.
+                if extra.get("hangupcause", "-EMPTY-") in (17, ):
+                    return None
+
+                log.debug("Звонок завершен с:"
+                          f"\n\tcontext=<red>{phone_message.context}</>\n\t"
                           f"event_type=<red>{phone_message.event_type}</>")
-                return "missed"
+                return "done"
+
+            case _:
+
+                # ? Звонок пропущен. CANCEL|NOANSWER|BUSY
+                if extra.get("dialstatus", "-EMPTY-") in (
+                        "CANCEL", "NOANSWER", "BUSY"):
+                    log.debug("Звонок пропущен с:"
+                              f"\n\textra=<red>{extra}</>\n\t"
+                              f"context=<red>{phone_message.context}</>\n\t"
+                              f"event_type=<red>{phone_message.event_type}</>")
+                    return "missed"
 
     return None
 
