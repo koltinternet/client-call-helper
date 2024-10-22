@@ -134,6 +134,10 @@ async def action(request: Request) -> Response:
             await ACTIVE_SESSIONS.update_action(
                 action="speak",
                 event_id=phone_message.linked_id)
+
+            log.debug(f"[- <red>{phone_message.linked_id}</> -] "
+                      f"Статус для answered: <green>{phone_message.caller_id_name}</>")
+
             await event_log_write(
                 "\n========== answered ==========\n",
                 phone_message.linked_id)
