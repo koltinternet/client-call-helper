@@ -74,15 +74,48 @@ class CallSession(Struct):
     """ ID телефонного аппарата поддержки """
     data: HydraData | dict | None = None
     """ Данные об учётке из Гидры """
+    is_out: bool = False
+    """ Признак исходящего звонка """
 
 
 class ActiveCallSessions:
     sessions: list[CallSession] = []
 
+    async def set_out_context(self, phone_message: PhoneMessage) -> None:
+        """ Устанавливает Истина для is_out,
+        для исходящего звонка, чтобы не выполнять
+        его рендер.
+        :param phone_message: Событие.
+        """
+        if phone_message.context != "out":
+            return
+
+        for s in self.sessions:
+            if s.event_id == phone_message.linked_id:
+                s.is_out = True
+                return
+
+        session = CallSession(
+            phone=phone_message.caller_id_num,
+            action="",
+            status="",
+            time=datetime.fromtimestamp(
+                float(phone_message.event_time)),
+            event_id=phone_message.linked_id,
+            support_id="",
+            is_out=True
+        )
+        self.sessions.insert(0, session)
+
+
     async def add_session(self, session: CallSession) -> None:
         """ Добавляет сессию в список сессий.
         :param session: Сессия.
         """
+        for session in self.sessions:
+            if session.event_id == session.event_id:
+                return
+
         self.sessions.insert(0, session)
         await self.render()
 
@@ -102,30 +135,49 @@ class ActiveCallSessions:
         """
         for session in self.sessions:
             if session.event_id == event_id:
+                if session.is_out:
+                    return
+
                 session.action = action
                 await self.render()
 
-    async def update_status_n_support_id(
-            self, status: str,
+    async def update_support_id(
+            self,
             support_id: str,
             event_id: str) -> None:
         """ Обновляет статус обращения и ID телефонного аппарата,
         на который был перенаправлен звонок.
-        :param status: Статус user|forced|kvartira|chasny|...
         :param support_id: ID телефонного аппарата поддержки.
         :param event_id: ID события.
         """
         for session in self.sessions:
             if session.event_id == event_id:
+                if session.is_out:
+                    return
+
                 session.action = "calling"
-                session.status = status
                 session.support_id = support_id
+                await self.render()
+
+    async def update_status(self, status: str, event_id: str) -> None:
+        """ Обновляет статус обращения.
+        :param status: Статус forced-support|toSupport|...
+        :param event_id: ID события.
+        """
+        for session in self.sessions:
+            if session.event_id == event_id:
+                if session.is_out:
+                    return
+
+                session.status = status
                 await self.render()
 
     async def render(self) -> None:
         """ Отправляет состояния сессий в сокеты. """
-        data = (json.encode(self.sessions)
-                .decode("utf-8"))
+        data = (json.encode([
+            session for session in self.sessions
+            if not session.is_out
+        ]).decode("utf-8"))
 
         for ws in SOCKETS:
             await ws.send_str(data)

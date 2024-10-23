@@ -19,7 +19,7 @@
 /**
  * @typedef {object} CallSession
  * @property {string} phone - номер телефона
- * @property {string} action - действие welcome|calling|answered|done|missed
+ * @property {string} action - действие welcome|calling|answered
  * @property {string} status - статус user|forced|kvartira|chasny|...
  * @property {string} time - datetime
  * @property {string} event_id - ID события

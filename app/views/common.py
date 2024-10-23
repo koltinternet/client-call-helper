@@ -24,6 +24,7 @@ __all__ = (
     "routes",
 )
 CONTEXT_NAMES = (
+    "dial-to-accounting-department",
     "dial-to-specialist",
     "dial-to-artem",
     "fast-support",
@@ -94,6 +95,8 @@ async def action(request: Request) -> Response:
     #     loads=action_decoder.decode
     # )
 
+    await ACTIVE_SESSIONS.set_out_context(phone_message)
+
     pprint(phone_message)
     print("=" * 10)
 
@@ -122,8 +125,7 @@ async def action(request: Request) -> Response:
 
         case "calling":
             log.debug(f"Статус звонка: <green>{phone_message.caller_id_name}</>")
-            await ACTIVE_SESSIONS.update_status_n_support_id(
-                status=phone_message.caller_id_name,
+            await ACTIVE_SESSIONS.update_support_id(
                 support_id=phone_message.caller_id_num,
                 event_id=phone_message.linked_id)
             await event_log_write(
@@ -132,15 +134,20 @@ async def action(request: Request) -> Response:
 
         case "answered":
             await ACTIVE_SESSIONS.update_action(
-                action="speak",
+                action="answered",
                 event_id=phone_message.linked_id)
-
-            log.debug(f"[- <red>{phone_message.linked_id}</> -] "
-                      f"Статус для answered: <green>{phone_message.caller_id_name}</>")
 
             await event_log_write(
                 "\n========== answered ==========\n",
                 phone_message.linked_id)
+
+        case "statuses":
+            await  ACTIVE_SESSIONS.update_status(
+                status=phone_message.caller_id_name,
+                event_id=phone_message.linked_id
+            )
+            log.debug(f"[- <red>{phone_message.linked_id}</> -] "
+                      f"Статус для answered: <green>{phone_message.caller_id_name}</>")
 
         case "done":
             await ACTIVE_SESSIONS.remove_session(
@@ -170,7 +177,9 @@ def get_message_signature(phone_message: PhoneMessage) -> str | None:
     # ? ivr-welcome|ivr-main
     # ? В тональном режиме выбирает статус обращения.
     ivr = phone_message.context.startswith("ivr-")
-    if ivr or phone_message.context == "incoming":
+    # ? notice-and-dial-to-specialist
+    notice = phone_message.context.startswith("notice-")
+    if ivr or notice or phone_message.context == "incoming":
         match phone_message.event_type:
             case "ANSWER":
                 return "welcome"
@@ -200,6 +209,11 @@ def get_message_signature(phone_message: PhoneMessage) -> str | None:
             # ? Oператор взял трубку и отвечает на звонок.
             case "ANSWER":
                 return "answered"
+
+            # ? Можно получить статус звонка.
+            case "BRIDGE_ENTER":
+                if phone_message.appname == "Queue":
+                    return "statuses"
 
             # ? Звонок завершен.
             case "HANGUP":

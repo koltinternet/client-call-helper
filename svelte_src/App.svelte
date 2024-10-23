@@ -199,9 +199,16 @@
 
                         {:else}
                             <div class="data">{action.data.full_name}</div>
-                            <div class="ceated">{new Date(action.time).toLocaleString()}</div>
+                            <div class="adresses">
+
+                                {#each action.data.addresses as address}
+                                    <span class="address">{address}</span>
+                                {/each}
+
+                            </div>
 
                         {/if}
+                        <div class="ceated">{new Date(action.time).toLocaleString()}</div>
 
                     {/if}
 
@@ -227,12 +234,24 @@
             &> .action-item {
                 display: flex;
                 gap: 10px;
-                border: solid gray 1px;
+                /* border: solid gray 1px; */
                 border-radius: 5px;
                 padding: 10px;
 
                 &.clickable {
                     cursor: pointer;
+                }
+
+                &.welcome {
+                    border: dashed rgba(128, 128, 128, 0.6) 1px;
+                }
+
+                &.calling {
+                    border: solid black 1px;
+                }
+
+                &.answered {
+                    border: solid red 1px;
                 }
 
                 &> .action-type {
