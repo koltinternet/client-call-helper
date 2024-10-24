@@ -27,6 +27,7 @@ CONTEXT_NAMES = (
     "dial-to-accounting-department",
     "dial-to-specialist",
     "dial-to-artem",
+    "nwh-artem",
     "fast-support",
     "from-internal"
 )
@@ -95,7 +96,7 @@ async def action(request: Request) -> Response:
     #     loads=action_decoder.decode
     # )
 
-    await ACTIVE_SESSIONS.set_out_context(phone_message)
+    # await ACTIVE_SESSIONS.set_out_context(phone_message)
 
     pprint(phone_message)
     print("=" * 10)
@@ -195,7 +196,6 @@ def get_message_signature(phone_message: PhoneMessage) -> str | None:
             phone_message.event_extra)
 
     if phone_message.context in CONTEXT_NAMES:
-
         match phone_message.event_type:
 
             # ? Пользователь определился со статусом обращения и
@@ -269,8 +269,7 @@ async def ws_loop(request: Request) -> WebSocketResponse:
     )
 
     async for msg in ws:
-        # log.debug(f"<red>{ws}-message</>: {msg}")
-        pass
+        message: dict = json.decode(msg)
 
     SOCKETS.remove(ws)
     # log.debug(f"<red>{ws}-disconnected</>")

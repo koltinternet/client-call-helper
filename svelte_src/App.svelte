@@ -1,6 +1,8 @@
 <script>
     import { CallSession } from "./func/types";
     import { onMount } from "svelte";
+    import { slide } from "svelte/transition";
+    import HydraBtn from "./HydraBtn.svelte";
     
     /** @type {WebSocket} */
     let socket = null;
@@ -9,8 +11,43 @@
     
     /** @type CallSession[] */
     let actions = [];
+
+    let test_action = "welcome";
+
+    const for_test = {
+        phone: "+79217809021",
+        action: "welcome",
+        status: "toSupport",
+        time: new Date(),
+        event_id: "1729243964.366",
+        support_id: "501",
+        data: {
+            login: "user",
+            phone: "+79217809021",
+            profile_url: "https://www.google.com/",
+            full_name: "Вася Пупкин",
+            short_name: "Пупкин В.",
+            created_date: "2021-01-01 12:00:00",
+            firm_id: 0,
+            addresses: [{
+                title: "Основной адрес",
+                data: "г. Москва, ул. Льва Толстого, д. 16",
+            }, {
+                title: "Для связи",
+                data: "+7 (495) 123-45-67",
+            }],
+        }
+    };
     
     // =============================================================
+
+    /**
+     * Выполняет тестовый рендер события.
+     * @return {void}
+    */
+    function handleTest() {
+        actions = [for_test];
+    }
 
     // /**
     //  * Обрабатывает сообщение, добавляя его в список сообщений,
@@ -171,24 +208,34 @@
 
 <div class="app-container">
     <h1>Активные события</h1>
+    <div class="test">
+        <button on:click={handleTest}>Тест</button>
+
+        <select bind:value={test_action} on:change={() => {
+            for_test.action = test_action;
+        }}>
+            <option value="welcome" selected>welcome</option>
+            <option value="calling">calling</option>
+            <option value="answered">answered</option>
+        </select>
+    </div>
 
     <hr>
 
     <div class="action-field">
 
         {#each actions as action (action.event_id)}
-            <div role="button" tabindex="0" on:keypress={() => {}}
-                class="action-item" on:click={() => openNewWindow(action)}
-                class:clickable={action.data !== null && action.data.login !== undefined}
+            <div transition:slide={{duration: 200, axis: "y"}}
+                class="action-item"
                 class:welcome={action.action === "welcome"}
                 class:calling={action.action === "calling"}
                 class:answered={action.action === "answered"}            
             >
-                <div class="action-type">{action.action}</div>
+                <div class="action-type">{action.status}</div>
                 <div class="action-body">
                     <div class="phone">{action.phone}</div>
-                    <div class="event-id">{action.event_id}</div>
-                    <div class="status">{action.status}</div>
+                    <!-- <div class="event-id">{action.event_id}</div> -->
+                    <!-- <div class="status">{action.status}</div> -->
 
                     {#if action.data === null}
                         <div class="loading-data">Загрузка данных ...</div>
@@ -198,11 +245,14 @@
                             <div class="empty-data">Неизвестный абонент</div>
 
                         {:else}
-                            <div class="data">{action.data.full_name}</div>
-                            <div class="adresses">
+                            <div class="full-name">{action.data.full_name}</div>
+                            <div class="addresses">
 
                                 {#each action.data.addresses as address}
-                                    <span class="address">{address}</span>
+                                    <div class="address">
+                                        <span class="address-title">{address.title}:</span>
+                                        <span class="address-data">{address.data}</span>
+                                    </div>
                                 {/each}
 
                             </div>
@@ -212,6 +262,26 @@
 
                     {/if}
 
+                </div>
+                <div class="call-hydra" title="Открыть в Гидре"
+                    role="button" tabindex="0" on:keypress={() => {}}
+                    on:click={() => openNewWindow(action)}>
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="hydra-icon">
+                        <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+                        <path d="M10 19a2 2 0 1 0 -4 0a2 2 0 0 0 4 0z" />
+                        <path d="M18 5a2 2 0 1 0 -4 0a2 2 0 0 0 4 0z" />
+                        <path d="M10 5a2 2 0 1 0 -4 0a2 2 0 0 0 4 0z" />
+                        <path d="M6 12a2 2 0 1 0 -4 0a2 2 0 0 0 4 0z" />
+                        <path d="M18 19a2 2 0 1 0 -4 0a2 2 0 0 0 4 0z" />
+                        <path d="M14 12a2 2 0 1 0 -4 0a2 2 0 0 0 4 0z" />
+                        <path d="M22 12a2 2 0 1 0 -4 0a2 2 0 0 0 4 0z" />
+                        <path d="M6 12h4" />
+                        <path d="M14 12h4" />
+                        <path d="M15 7l-2 3" />
+                        <path d="M9 7l2 3" />
+                        <path d="M11 14l-2 3" />
+                        <path d="M13 14l2 3" />
+                    </svg>
                 </div>
             </div>
         {:else}
@@ -230,13 +300,23 @@
 
         &> .action-field {
             min-height: 50px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
             
             &> .action-item {
                 display: flex;
                 gap: 10px;
                 /* border: solid gray 1px; */
+                box-shadow: none;
                 border-radius: 5px;
                 padding: 10px;
+                background: transparent;
+                transition: all 0.2s ease;
+
+                &:hover {
+                    box-shadow: 0 0 5px black;
+                }
 
                 &.clickable {
                     cursor: pointer;
@@ -244,14 +324,17 @@
 
                 &.welcome {
                     border: dashed rgba(128, 128, 128, 0.6) 1px;
+                    background: rgba(128, 128, 128, 0.4);
                 }
 
                 &.calling {
-                    border: solid black 1px;
+                    border: solid orange 1px;
+                    background: rgba(255, 165, 0, 0.4);
                 }
 
                 &.answered {
-                    border: solid red 1px;
+                    border: solid green 1px;
+                    background: rgba(0, 128, 0, 0.4);
                 }
 
                 &> .action-type {
@@ -262,13 +345,55 @@
                 }
 
                 &> .action-body {
-                    display: flex;
-                    flex-flow: row wrap;
+                    display: grid;
+                    grid-template:
+                        "phone name ceated"
+                        "addr  addr   addr"
+                        / 1fr 1fr 1fr;
                     gap: 5px;
                     width: 100%;
 
                     &> * {
                         padding: 5px;
+                    }
+
+                    &> .phone {
+                        grid-area: phone;
+                    }
+
+                    &> .full-name {
+                        grid-area: name;
+                    }
+
+                    &> .ceated {
+                        grid-area: ceated;
+                    }
+
+                    &> .addresses {
+                        grid-area: addr;
+                    }
+                }
+
+                &> .call-hydra {
+                    cursor: pointer;
+                    display: flex;
+                    align-items: center;
+                    padding: 10px;
+                    color: black;
+
+                    transition: all 0.2s ease;
+
+                    &:hover {
+                        color: red;
+                    }
+
+                    &> .hydra-icon {
+                        transform: rotateZ(0deg);
+                        transition: all 1s ease-in, all .2s ease-out;
+
+                        &:hover {
+                            transform: rotateZ(180deg);
+                        }
                     }
                 }
             }

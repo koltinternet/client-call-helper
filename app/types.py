@@ -135,9 +135,6 @@ class ActiveCallSessions:
         """
         for session in self.sessions:
             if session.event_id == event_id:
-                if session.is_out:
-                    return
-
                 session.action = action
                 await self.render()
 
@@ -152,9 +149,6 @@ class ActiveCallSessions:
         """
         for session in self.sessions:
             if session.event_id == event_id:
-                if session.is_out:
-                    return
-
                 session.action = "calling"
                 session.support_id = support_id
                 await self.render()
@@ -166,18 +160,12 @@ class ActiveCallSessions:
         """
         for session in self.sessions:
             if session.event_id == event_id:
-                if session.is_out:
-                    return
-
                 session.status = status
                 await self.render()
 
     async def render(self) -> None:
         """ Отправляет состояния сессий в сокеты. """
-        data = (json.encode([
-            session for session in self.sessions
-            if not session.is_out
-        ]).decode("utf-8"))
+        data = (json.encode(self.sessions).decode("utf-8"))
 
         for ws in SOCKETS:
             await ws.send_str(data)
